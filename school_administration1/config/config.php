@@ -49,14 +49,25 @@ function get_db_connection_transactional($host, $user, $pass, $db_name) {
 }
 
 function fetch_full_student_data($conn, $student_id) {
-    // Updated to select AcademicYear instead of RegistrationYear
+    // UPDATED: Now selects split address fields and parent emails
     $sql = "
         SELECT 
-            S.StudentID, S.AdmissionYear, S.Name, S.Surname, S.DateOfBirth, S.Gender, S.CurrentAddress AS Address, S.PhotoPath,
-            P.father_name, P.father_age, P.father_contact, P.father_occupation, P.father_education,
-            P.mother_name, P.mother_age, P.mother_contact, P.mother_occupation, P.mother_education,
-            P.guardian_name, P.guardian_relation, P.guardian_age, P.guardian_contact, P.guardian_occupation, P.guardian_education, P.guardian_address,
+            S.StudentID, S.AdmissionYear, S.Name, S.Surname, S.DateOfBirth, S.Gender, S.PhotoPath,
+            -- Split Address Columns
+            S.HouseNo, S.Street, S.Village, S.Town, S.District, S.State, S.Country,
+            
+            -- Father Details (Added Email)
+            P.father_name, P.father_age, P.father_contact, P.father_email, P.father_occupation, P.father_education,
+            
+            -- Mother Details (Added Email)
+            P.mother_name, P.mother_age, P.mother_contact, P.mother_email, P.mother_occupation, P.mother_education,
+            
+            -- Guardian Details (Added Email)
+            P.guardian_name, P.guardian_relation, P.guardian_age, P.guardian_contact, P.guardian_email, 
+            P.guardian_occupation, P.guardian_education, P.guardian_address,
             P.MoreInformation AS GuardianNotes,
+            
+            -- Academic & Enrollment
             A.FormerSchool, A.PLEIndexNumber, A.PLEAggregate, A.UCEIndexNumber, A.UCEResult,
             E.Class, E.Level, E.Term, E.AcademicYear, E.Residence, E.EntryStatus, E.Stream
         FROM Students S

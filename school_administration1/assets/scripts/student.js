@@ -4,10 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("STATUS: Student.js loaded.");
 
     // =========================================================================
-    // 1. DEFINE ALL FUNCTIONS FIRST
+    // 1. DEFINE HELPER FUNCTIONS
     // =========================================================================
 
-    // --- Dropdown Helper ---
     const classesMap = {
         'pre-primary': ['PP.1', 'PP.2', 'PP.3'],
         'primary': ['P.1', 'P.2', 'P.3', 'P.4', 'P.5', 'P.6', 'P.7'],
@@ -29,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Global Alert System ---
     window.showCustomAlert = function(type, title, message) {
         let modalContainer = document.getElementById('custom-alert-modal');
         if (!modalContainer) {
@@ -58,21 +56,20 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         
-        // Bind close button dynamically
         const closeBtn = modalContainer.querySelector('.modal-close-btn');
         if(closeBtn) {
             closeBtn.onclick = function() {
                 modalContainer.classList.remove('show');
             };
         }
-        
         modalContainer.classList.add('show');
     };
 
-    // --- Admission Handler (AJAX) ---
+    // =========================================================================
+    // 2. ADMISSION SUBMISSION HANDLER
+    // =========================================================================
     window.handleAdmission = function(e) {
         e.preventDefault();
-        console.log("Submitting admission form..."); 
         
         const form = e.target;
         const formData = new FormData(form);
@@ -91,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if(data.success) {
                 window.showCustomAlert('success', 'Admission Complete', data.message);
-                form.reset();
+                form.reset(); // This trigger the 'reset' event listener below
             } else {
                 window.showCustomAlert('error', 'Admission Failed', data.message);
             }
@@ -108,14 +105,71 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- Load Student List ---
+    // =========================================================================
+    // 3. PHOTO UPLOAD LOGIC (Correctly placed outside handlers)
+    // =========================================================================
+    const photoInput = document.getElementById('photo');
+    const photoWrapper = document.getElementById('admission-photo-wrapper');
+    const previewImg = document.getElementById('admission-photo-preview');
+    const placeholder = document.getElementById('upload-placeholder');
+    const admissionForm = document.getElementById('admission-form');
+
+    // Helper to Reset UI
+    function resetPhotoUI() {
+        if (photoWrapper) photoWrapper.classList.remove('has-file');
+        
+        if (previewImg) {
+            previewImg.src = '';
+            previewImg.style.display = 'none';
+        }
+        
+        if (placeholder) {
+            placeholder.style.display = ''; // Remove inline styles to let CSS take over
+        }
+    }
+
+    // Handle Selection
+    if (photoInput && photoWrapper && previewImg) {
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+
+            if (file) {
+                // Show Preview
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    previewImg.src = evt.target.result;
+                    previewImg.style.display = 'block'; // Force Show
+                    photoWrapper.classList.add('has-file');
+                    
+                    // Manually hide placeholder so it doesn't push the image down
+                    if(placeholder) placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                // Cancelled Selection
+                resetPhotoUI();
+            }
+        });
+    }
+
+    // Handle Form Reset (Button Click & Success)
+    if (admissionForm) {
+        admissionForm.addEventListener('reset', function() {
+            // Tiny timeout to let browser clear input first
+            setTimeout(resetPhotoUI, 10);
+        });
+    }
+
+    // =========================================================================
+    // 4. OTHER MODULE HANDLERS (List, Profile, Migration, etc.)
+    // =========================================================================
+
     window.loadStudentList = function(e) {
         if (e) e.preventDefault();
         const container = document.getElementById('student-list-results');
         const form = document.getElementById('student-filter-form');
         
         if(!container) return;
-
         let params = "";
         if(form) params = new URLSearchParams(new FormData(form)).toString();
         
@@ -123,13 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fetch(`modules/students/partial/viewstudents.php?${params}`)
         .then(r => r.text())
-        .then(html => {
-            container.innerHTML = html;
-        })
+        .then(html => { container.innerHTML = html; })
         .catch(err => container.innerHTML = '<p class="error">Failed to load list.</p>');
     };
 
-    // --- Load Summary ---
     window.loadSummary = function(e) {
         if (e) e.preventDefault();
         const container = document.getElementById('summary-results');
@@ -153,14 +204,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function initSummaryTabs(context) {
         const tabs = context.querySelectorAll('.tab-button');
         if (!tabs.length) return;
-
         tabs.forEach(btn => {
             btn.addEventListener('click', function() {
                 const group = this.closest('.summary-tabs') || this.closest('.sub-tab-navigation');
                 const parentContainer = this.closest('.summary-container') || this.closest('.tab-content');
-                
                 if(group) group.querySelectorAll('.tab-button, .sub-tab-button').forEach(t => t.classList.remove('active'));
-                
                 if(parentContainer) {
                     parentContainer.querySelectorAll('.tab-content, .sub-tab-content').forEach(c => {
                         if(c.parentElement === parentContainer || c.parentElement.parentElement === parentContainer) {
@@ -169,14 +217,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 }
-
                 this.classList.add('active');
                 const targetId = this.dataset.tab || this.dataset.subTab;
                 const targetContent = document.getElementById(targetId);
                 if(targetContent) {
                     targetContent.style.display = 'block';
                     targetContent.classList.add('active');
-                    
                     const subNav = targetContent.querySelector('.sub-tab-navigation');
                     if(subNav && !targetContent.querySelector('.sub-tab-content.active')) {
                         const firstSub = subNav.querySelector('.sub-tab-button');
@@ -187,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Profile & Edit Handlers ---
+    // --- Profile & Edit ---
     window.loadProfileViaAjax = function(studentId) {
         localStorage.setItem('currentStudentId', studentId); 
         document.querySelectorAll('.module').forEach(m => m.style.display = 'none');
@@ -247,12 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    window.triggerPhotoUpload = function() {
-        const fileInput = document.getElementById('edit-photo');
-        if (fileInput) fileInput.click();
-    };
-
-    // --- Delete Handlers ---
+    // --- Delete ---
     window.showDeleteConfirmModal = function(studentId, studentName) {
         let modal = document.getElementById('custom-alert-modal');
         if(!modal) {
@@ -295,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- Print Functions ---
+    // --- Print ---
     window.printStudentProfile = function(studentId) {
         const printUrl = `modules/students/print_student.php?id=${studentId}`;
         let existingFrame = document.getElementById('print-frame');
@@ -303,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const iframe = document.createElement('iframe');
         iframe.id = 'print-frame';
-        iframe.style.position = 'fixed'; // Keep it hidden but part of DOM
+        iframe.style.position = 'fixed'; 
         iframe.style.right = '0';
         iframe.style.bottom = '0';
         iframe.style.width = '0';
@@ -317,27 +358,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     iframe.contentWindow.focus();
                     iframe.contentWindow.print();
-                } catch(e) {
-                    console.error("Print Error:", e);
-                    window.showCustomAlert('error', 'Print Error', 'Browser blocked print.');
-                }
+                } catch(e) { console.error("Print Error:", e); }
             }, 500);
         };
-    };
-
-    window.closePrintModal = function() {
-        const modal = document.getElementById('print-preview-modal');
-        const iframe = document.getElementById('print-frame');
-        if (modal) modal.classList.remove('show');
-        if (iframe) iframe.src = 'about:blank';
-    };
-
-    window.triggerFramePrint = function() {
-        const iframe = document.getElementById('print-frame');
-        if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-        }
     };
 
     // --- Migration Module Logic ---
@@ -394,7 +417,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         
-        // Persistent Profile Load
         if (window.location.hash === '#profile') {
             const savedId = localStorage.getItem('currentStudentId');
             if (savedId) setTimeout(() => window.loadProfileViaAjax(savedId), 50);
@@ -477,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const modal = document.getElementById('migration-confirm-modal');
-        document.getElementById('mig-confirm-message').innerHTML = `Move <strong>${label}</strong> to <strong>${tClass} ${tStream||''} (${tTerm}, ${tYear})</strong>?`;
+        document.getElementById('mig-confirm-message').innerHTML = `Move Student <strong> ${label} (Stu id : ${ids})</strong> to <strong>${tClass} ${tStream||''} (${tTerm}, ${tYear})</strong>?`;
         document.getElementById('mig-confirm-dest').textContent = `${tLevel} - ${tClass}`;
         modal.classList.add('show');
     }
@@ -519,20 +541,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================================
-    // 9. BIND EVENTS (SAFE ZONE)
+    // 5. EVENT BINDING
     // =========================================================================
 
-    // Admission Form
-    const admissionForm = document.getElementById('admission-form');
+    // Bind Admission Form
     if (admissionForm) {
         admissionForm.addEventListener('submit', window.handleAdmission);
     }
+    
+    // Bind Reset Button (Manually triggers reset event)
     const resetBtn = document.getElementById('admission-reset-btn');
     if(resetBtn) {
-        resetBtn.addEventListener('click', () => admissionForm.reset());
+        resetBtn.addEventListener('click', () => {
+            if(admissionForm) admissionForm.reset();
+        });
     }
 
-    // Initialize Dropdowns
+    // Dropdowns
     const admLevel = document.getElementById('level');
     const admClass = document.getElementById('class');
     if (admLevel && admClass) {
@@ -553,27 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const profileLevel = document.getElementById('i-level');
-    const profileClass = document.getElementById('i-class');
-    if (profileLevel && profileClass) {
-        profileLevel.addEventListener('change', () => populateClassDropdown(profileLevel, profileClass));
-        const currentClassValue = profileClass.getAttribute('data-current'); 
-        populateClassDropdown(profileLevel, profileClass);
-        if (currentClassValue) {
-            let found = false;
-            for (let i = 0; i < profileClass.options.length; i++) {
-                if (profileClass.options[i].value === currentClassValue) {
-                    profileClass.selectedIndex = i; found = true; break;
-                }
-            }
-            if (!found) {
-                const opt = document.createElement('option');
-                opt.value = currentClassValue; opt.textContent = currentClassValue + " (Legacy)"; opt.selected = true;
-                profileClass.appendChild(opt);
-            }
-        }
-    }
-
+    // Edit Profile Photo Trigger
     document.addEventListener('change', function(e) {
         if (e.target && e.target.id === 'edit-photo') {
             if (e.target.files && e.target.files[0]) {
@@ -589,5 +594,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     initMigrationModule();
-
 });

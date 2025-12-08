@@ -9,9 +9,9 @@ BEGIN
     -- =========================================================================
     
     -- Counters
-    DECLARE c_idx INT DEFAULT 1;  -- Class Loop (1-16)
-    DECLARE s_idx INT DEFAULT 1;  -- Stream Loop (1-5)
-    DECLARE stu_idx INT DEFAULT 1; -- Student Loop (1-10)
+    DECLARE c_idx INT DEFAULT 1;
+    DECLARE s_idx INT DEFAULT 1;
+    DECLARE stu_idx INT DEFAULT 1;
     
     -- Student Data
     DECLARE v_student_id INT;
@@ -22,18 +22,28 @@ BEGIN
     DECLARE v_surname VARCHAR(50);
     DECLARE v_name VARCHAR(50);
     DECLARE v_dob DATE;
-    DECLARE v_address VARCHAR(100);
     DECLARE v_photo VARCHAR(255);
+
+    -- NEW: Split Address Variables (Replacing v_address)
+    DECLARE v_houseNo VARCHAR(50);
+    DECLARE v_street VARCHAR(100);
+    DECLARE v_village VARCHAR(100);
+    DECLARE v_town VARCHAR(100);
+    DECLARE v_district VARCHAR(100);
+    DECLARE v_state VARCHAR(100);
+    DECLARE v_country VARCHAR(100) DEFAULT 'Uganda';
     
     -- Parent Data (Mandatory)
     DECLARE v_father_name VARCHAR(100);
     DECLARE v_father_contact VARCHAR(20);
+    DECLARE v_father_email VARCHAR(150); -- NEW
     DECLARE v_father_age INT;
     DECLARE v_father_occ VARCHAR(50);
     DECLARE v_father_edu VARCHAR(50);
     
     DECLARE v_mother_name VARCHAR(100);
     DECLARE v_mother_contact VARCHAR(20);
+    DECLARE v_mother_email VARCHAR(150); -- NEW
     DECLARE v_mother_age INT;
     DECLARE v_mother_occ VARCHAR(50);
     DECLARE v_mother_edu VARCHAR(50);
@@ -42,11 +52,12 @@ BEGIN
     DECLARE v_has_guardian INT;
     DECLARE v_guardian_name VARCHAR(100);
     DECLARE v_guardian_contact VARCHAR(20);
+    DECLARE v_guardian_email VARCHAR(150); -- NEW
     DECLARE v_guardian_rel VARCHAR(20);
     DECLARE v_guardian_age INT;
     DECLARE v_guardian_occ VARCHAR(50);
     DECLARE v_guardian_edu VARCHAR(50);
-    DECLARE v_guardian_addr VARCHAR(100);
+    DECLARE v_guardian_addr TEXT; -- Kept as TEXT in Parents table
     
     -- Academic & Enrollment
     DECLARE v_former_school VARCHAR(100);
@@ -56,8 +67,8 @@ BEGIN
     DECLARE v_uce_res VARCHAR(20);
     
     -- Fixed/Calculated Fields
-    DECLARE v_adm_year INT DEFAULT 2025; -- Fixed Admission Year
-    DECLARE v_academic_year VARCHAR(20); -- Format: 2025-26
+    DECLARE v_adm_year INT DEFAULT 2025;
+    DECLARE v_academic_year VARCHAR(20); 
     DECLARE v_term VARCHAR(20);
     DECLARE v_residence VARCHAR(20);
     DECLARE v_entry_status VARCHAR(20);
@@ -70,7 +81,7 @@ BEGIN
     -- 2. GENERATION LOGIC
     -- =========================================================================
     
-    -- LOOP CLASSES (PP1 to S6 = 16 Classes)
+    -- LOOP CLASSES (PP1 to S6 = 16 Classes) [cite: 14]
     SET c_idx = 1;
     WHILE c_idx <= 16 DO
         
@@ -93,12 +104,12 @@ BEGIN
         ELSEIF c_idx = 16 THEN SET v_class = 'S.6'; SET v_level = 'Secondary';
         END IF;
 
-        -- LOOP STREAMS (A, B, C, D, E)
+        -- LOOP STREAMS (A, B, C, D, E) [cite: 31]
         SET s_idx = 1;
         WHILE s_idx <= 5 DO
             SET v_stream = ELT(s_idx, 'A', 'B', 'C', 'D', 'E');
 
-            -- LOOP STUDENTS (Exactly 10 per stream = 50 per class)
+            -- LOOP STUDENTS (Exactly 10 per stream) [cite: 33]
             SET stu_idx = 1;
             WHILE stu_idx <= 10 DO
                 
@@ -113,45 +124,69 @@ BEGIN
                 END IF;
 
                 -- DOB between 2005 and 2010
-                SET v_dob = DATE_ADD('2005-01-01', INTERVAL FLOOR(RAND() * 1825) DAY); 
-                SET v_address = ELT(FLOOR(1 + (RAND() * 10)), 'Kampala', 'Gulu', 'Mbale', 'Jinja', 'Mbarara', 'Arua', 'Fort Portal', 'Masaka', 'Soroti', 'Lira');
+                SET v_dob = DATE_ADD('2005-01-01', INTERVAL FLOOR(RAND() * 1825) DAY);
                 
-                -- Placeholder photo path
-                SET v_photo = 'static/images/default_profile.png'; 
+                -- NEW: Generate Split Address Data
+                SET v_houseNo = FLOOR(1 + (RAND() * 500));
+                SET v_street = ELT(FLOOR(1 + (RAND() * 6)), 'Main Street', 'Church Road', 'Market Lane', 'School Road', 'Hospital View', 'Central Avenue');
+                SET v_town = ELT(FLOOR(1 + (RAND() * 10)), 'Kampala', 'Gulu', 'Mbale', 'Jinja', 'Mbarara', 'Arua', 'Fort Portal', 'Masaka', 'Soroti', 'Lira');
+                SET v_village = CONCAT(v_town, ' Central'); 
+                SET v_district = v_town; 
+                SET v_state = 'Central Region'; 
+                SET v_country = 'Uganda';
 
-                -- INSERT STUDENT
-                INSERT INTO students (AdmissionYear, Name, Surname, DateOfBirth, Gender, CurrentAddress, PhotoPath)
-                VALUES (v_adm_year, v_name, v_surname, v_dob, v_gender, v_address, v_photo);
+                SET v_photo = 'static/images/default_profile.png';
+
+                -- INSERT STUDENT (Updated Columns)
+                INSERT INTO students (
+                    AdmissionYear, Name, Surname, DateOfBirth, Gender, 
+                    HouseNo, Street, Village, Town, District, State, Country, 
+                    PhotoPath
+                ) VALUES (
+                    v_adm_year, v_name, v_surname, v_dob, v_gender, 
+                    v_houseNo, v_street, v_village, v_town, v_district, v_state, v_country, 
+                    v_photo
+                );
                 
                 SET v_student_id = LAST_INSERT_ID();
 
                 -- B. PARENT DETAILS (Mandatory)
+                
                 -- Father
                 SET v_father_name = CONCAT(ELT(FLOOR(1 + (RAND() * 15)), 'John', 'David', 'Moses', 'Isaac', 'Brian', 'Joseph', 'Paul', 'Ivan', 'Samuel', 'Daniel', 'Solomon', 'Timothy', 'Mark', 'Andrew', 'Peter'), ' ', v_surname);
                 SET v_father_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
-                SET v_father_age = FLOOR(30 + (RAND() * 40)); -- 30-70
+                -- Generate Email
+                SET v_father_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_father_name, ' ', 1)), ' ', ''), '.', LOWER(v_surname), FLOOR(RAND()*99), '@gmail.com');
+                
+                SET v_father_age = FLOOR(30 + (RAND() * 40)); 
                 SET v_father_occ = ELT(FLOOR(1 + (RAND() * 9)), 'Teacher', 'Farmer', 'Doctor', 'Engineer', 'Driver', 'Shopkeeper', 'Civil Servant', 'Carpenter', 'Mechanic');
                 SET v_father_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
-
+                
                 -- Mother
                 SET v_mother_name = CONCAT(ELT(FLOOR(1 + (RAND() * 15)), 'Mary', 'Sarah', 'Grace', 'Joy', 'Pritah', 'Esther', 'Joan', 'Sandra', 'Ritah', 'Mercy', 'Doreen', 'Rebecca', 'Alice', 'Brenda', 'Winnie'), ' ', ELT(FLOOR(1 + (RAND() * 20)), 'Kato', 'Mukasa', 'Okello', 'Akello', 'Namukasa', 'Musoke', 'Mugabe', 'Kyomuhendo', 'Nalubega', 'Ochieng', 'Lwanga', 'Nantogo', 'Opio', 'Aine', 'Busingye', 'Ssemwogerere', 'Nakato', 'Waiswa', 'Byaruhanga', 'Tumusiime'));
                 SET v_mother_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
-                SET v_mother_age = FLOOR(28 + (RAND() * 37)); -- 28-65
+                -- Generate Email
+                SET v_mother_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_mother_name, ' ', 1)), ' ', ''), '.', FLOOR(RAND()*999), '@gmail.com');
+
+                SET v_mother_age = FLOOR(28 + (RAND() * 37));
                 SET v_mother_occ = ELT(FLOOR(1 + (RAND() * 8)), 'Nurse', 'Farmer', 'Teacher', 'Tailor', 'Trader', 'Civil Servant', 'Housewife', 'Entrepreneur');
                 SET v_mother_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
-
-                -- C. GUARDIAN (All-or-Nothing Logic: 30% chance of having a guardian)
+                
+                -- C. GUARDIAN (30% chance)
                 IF RAND() < 0.3 THEN
                     SET v_guardian_name = CONCAT(ELT(FLOOR(1 + (RAND() * 10)), 'James', 'Charles', 'Patrick', 'Robert', 'Susan', 'Hellen', 'Florence', 'Alice', 'Rose', 'Lillian'), ' ', v_surname);
                     SET v_guardian_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
+                    SET v_guardian_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_guardian_name, ' ', 1)), ' ', ''), '.', FLOOR(RAND()*99), '@yahoo.com');
                     SET v_guardian_rel = ELT(FLOOR(1 + (RAND() * 6)), 'Father', 'Mother', 'Uncle', 'Aunt', 'Grandparent', 'Other');
                     SET v_guardian_age = FLOOR(25 + (RAND() * 55));
                     SET v_guardian_occ = ELT(FLOOR(1 + (RAND() * 9)), 'Teacher', 'Farmer', 'Doctor', 'Engineer', 'Driver', 'Shopkeeper', 'Civil Servant', 'Carpenter', 'Mechanic');
                     SET v_guardian_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
-                    SET v_guardian_addr = v_address;
+                    -- Concatenate split address for Guardian (since Parent table still uses 'text' for guardian address)
+                    SET v_guardian_addr = CONCAT(v_houseNo, ' ', v_street, ', ', v_town, ', ', v_district);
                 ELSE
                     SET v_guardian_name = NULL;
                     SET v_guardian_contact = NULL;
+                    SET v_guardian_email = NULL;
                     SET v_guardian_rel = NULL;
                     SET v_guardian_age = NULL;
                     SET v_guardian_occ = NULL;
@@ -160,28 +195,27 @@ BEGIN
                 END IF;
 
                 SET v_more_info = ELT(FLOOR(1 + (RAND() * 5)), 'Active in debate club', 'Prefect', 'Choir member', 'Football team', 'Science fair participant');
-
-                -- INSERT PARENTS
+                
+                -- INSERT PARENTS (Updated with Emails)
                 INSERT INTO parents (
                     StudentID, 
-                    father_name, father_age, father_contact, father_occupation, father_education,
-                    mother_name, mother_age, mother_contact, mother_occupation, mother_education,
-                    guardian_name, guardian_relation, guardian_contact, guardian_age, guardian_occupation, guardian_education, guardian_address,
+                    father_name, father_age, father_contact, father_email, father_occupation, father_education,
+                    mother_name, mother_age, mother_contact, mother_email, mother_occupation, mother_education,
+                    guardian_name, guardian_relation, guardian_contact, guardian_email, guardian_age, guardian_occupation, guardian_education, guardian_address,
                     MoreInformation
                 ) VALUES (
                     v_student_id,
-                    v_father_name, v_father_age, v_father_contact, v_father_occ, v_father_edu,
-                    v_mother_name, v_mother_age, v_mother_contact, v_mother_occ, v_mother_edu,
-                    v_guardian_name, v_guardian_rel, v_guardian_contact, v_guardian_age, v_guardian_occ, v_guardian_edu, v_guardian_addr,
+                    v_father_name, v_father_age, v_father_contact, v_father_email, v_father_occ, v_father_edu,
+                    v_mother_name, v_mother_age, v_mother_contact, v_mother_email, v_mother_occ, v_mother_edu,
+                    v_guardian_name, v_guardian_rel, v_guardian_contact, v_guardian_email, v_guardian_age, v_guardian_occ, v_guardian_edu, v_guardian_addr,
                     v_more_info
                 );
 
-                -- D. ACADEMIC RECORDS (Mandatory)
+                -- D. ACADEMIC RECORDS (Mandatory) [cite: 61]
                 SET v_former_school = ELT(FLOOR(1 + (RAND() * 5)), 'Namilyango School', 'Gayaza High School', 'Ntare School', 'Buddo Junior', 'Greenhill Academy');
                 
-                -- Generate Random PLE/UCE numbers
                 SET v_ple_idx = CONCAT('PLE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
-                SET v_ple_agg = FLOOR(4 + (RAND() * 32)); -- 4 to 36
+                SET v_ple_agg = FLOOR(4 + (RAND() * 32)); 
                 
                 SET v_uce_idx = CONCAT('UCE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
                 SET v_uce_res = ELT(FLOOR(1 + (RAND() * 4)), 'Division I', 'Division II', 'Division III', 'Division IV');
@@ -189,9 +223,7 @@ BEGIN
                 INSERT INTO academichistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
                 VALUES (v_student_id, v_former_school, v_ple_idx, v_ple_agg, v_uce_idx, v_uce_res);
 
-                -- E. ENROLLMENT (Strict Rules)
-                -- Admission Year fixed at 2025 (in Students table)
-                -- Academic Year stored as 2025-26
+                -- E. ENROLLMENT [cite: 66]
                 SET v_term = ELT(FLOOR(1 + (RAND() * 3)), 'Term 1', 'Term 2', 'Term 3');
                 SET v_residence = IF(RAND() > 0.5, 'Boarding', 'Day');
                 SET v_entry_status = IF(v_class = 'P.1' OR v_class = 'S.1' OR v_class = 'PP.1', 'New', 'Continuing');

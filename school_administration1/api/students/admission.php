@@ -41,13 +41,21 @@ try {
     $conn = get_db_connection_transactional($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
     if (!$conn) throw new Exception("Database connection failed.");
 
-    // --- 1. Basic Info ---
+    // --- 1. Basic Info & Address ---
     $name = trim($_POST['name'] ?? '');
     $surname = trim($_POST['surname'] ?? '');
     $dob = $_POST['dob'] ?? '';
     $gender = $_POST['gender'] ?? '';
-    $address = trim($_POST['address'] ?? '');
     $admission_year = $_POST['admission_year'] ?? date('Y');
+    
+    // New Split Address Fields
+    $house = trim($_POST['house_no'] ?? '');
+    $street = trim($_POST['street'] ?? '');
+    $village = trim($_POST['village'] ?? '');
+    $town = trim($_POST['town'] ?? '');
+    $district = trim($_POST['district'] ?? '');
+    $state = trim($_POST['state'] ?? '');
+    $country = trim($_POST['country'] ?? 'Uganda');
     
     if (empty($name) || empty($surname) || empty($dob) || empty($gender)) {
         throw new Exception("Personal Information incomplete.");
@@ -55,11 +63,16 @@ try {
 
     $academic_year_string = format_academic_year($admission_year);
 
-    // --- 2. Parents Info ---
+    // --- 2. Parents Info (with Emails) ---
     $father_name = trim($_POST['father_name'] ?? '');
     $mother_name = trim($_POST['mother_name'] ?? '');
     $father_contact = $_POST['father_contact'] ?? '';
     $mother_contact = $_POST['mother_contact'] ?? '';
+    
+    // New Email Fields
+    $f_email = trim($_POST['father_email'] ?? '');
+    $m_email = trim($_POST['mother_email'] ?? '');
+    $g_email = trim($_POST['guardian_email'] ?? '');
 
     if (empty($father_name) || empty($mother_name)) {
         throw new Exception("Father's and Mother's names are required.");
@@ -136,15 +149,18 @@ try {
         }
     }
 
-    // --- 4. Photo Upload ---
-    $sql_stu = "INSERT INTO Students (AdmissionYear, Name, Surname, DateOfBirth, Gender, CurrentAddress, PhotoPath) VALUES (?, ?, ?, ?, ?, ?, NULL)";
+    // --- 4. Student Insert (New split address columns) ---
+    $sql_stu = "INSERT INTO Students (AdmissionYear, Name, Surname, DateOfBirth, Gender, HouseNo, Street, Village, Town, District, State, Country, PhotoPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)";
+    
     $stmt_stu = $conn->prepare($sql_stu);
-    $stmt_stu->bind_param("isssss", $admission_year, $name, $surname, $dob, $gender, $address);
+    // Bind: 12 params (i + 11s)
+    $stmt_stu->bind_param("isssssssssss", $admission_year, $name, $surname, $dob, $gender, $house, $street, $village, $town, $district, $state, $country);
+    
     if (!$stmt_stu->execute()) throw new Exception("Failed to create student record: " . $stmt_stu->error);
     $student_id = $conn->insert_id;
     $stmt_stu->close();
 
-    $photo_path = null;
+    // Photo Upload
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['photo'];
         if ($file['size'] <= $MAX_FILE_SIZE && allowed_file($file['name'], $ALLOWED_EXTENSIONS)) {
@@ -161,11 +177,18 @@ try {
         }
     }
 
-    // --- 5. Insert Dependents ---
-    $sql_par = "INSERT INTO Parents (StudentID, father_name, father_contact, father_age, father_occupation, father_education, mother_name, mother_contact, mother_age, mother_occupation, mother_education, guardian_name, guardian_relation, guardian_contact, guardian_age, guardian_occupation, guardian_address, MoreInformation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // --- 5. Insert Dependents (Updated with Email columns) ---
+    $sql_par = "INSERT INTO Parents (
+        StudentID, 
+        father_name, father_contact, father_email, father_age, father_occupation, father_education, 
+        mother_name, mother_contact, mother_email, mother_age, mother_occupation, mother_education, 
+        guardian_name, guardian_relation, guardian_contact, guardian_email, guardian_age, guardian_occupation, guardian_address, 
+        MoreInformation
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    
     $stmt_par = $conn->prepare($sql_par);
     
-    // VARIABLES FOR BIND_PARAM (Fixes "Cannot pass parameter 3 by reference" error)
+    // Prepare vars for nullable fields
     $f_age = $_POST['father_age'] ?: null;
     $f_occ = $_POST['father_occupation'] ?? '';
     $f_edu = $_POST['father_education'] ?? '';
@@ -177,24 +200,23 @@ try {
     $g_age = $_POST['guardian_age'] ?: null;
     $g_occ = $_POST['guardian_occupation'] ?? '';
     $g_addr = $_POST['guardian_address'] ?? '';
-    
     $more_info = $_POST['more_info'] ?? '';
 
-    $stmt_par->bind_param("ississsisssssissss", 
+    // Bind: 21 params
+    $stmt_par->bind_param("isssissssisssssssisss", 
         $student_id, 
-        $father_name, $father_contact, $f_age, $f_occ, $f_edu,
-        $mother_name, $mother_contact, $m_age, $m_occ, $m_edu,
-        $g_name, $g_relation, $g_contact, $g_age, $g_occ, $g_addr,
+        $father_name, $father_contact, $f_email, $f_age, $f_occ, $f_edu,
+        $mother_name, $mother_contact, $m_email, $m_age, $m_occ, $m_edu,
+        $g_name, $g_relation, $g_contact, $g_email, $g_age, $g_occ, $g_addr,
         $more_info
     );
     $stmt_par->execute();
     $stmt_par->close();
 
-    // --- 6. Academic History (FIXED: Assigned variables) ---
+    // --- 6. Academic History ---
     $sql_hist = "INSERT INTO AcademicHistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt_hist = $conn->prepare($sql_hist);
     
-    // Variables for bind_param
     $former = $_POST['former_school'] ?? '';
     $ple_idx = $_POST['ple_index'] ?? '';
     $ple_agg = !empty($_POST['ple_agg']) ? $_POST['ple_agg'] : null;
@@ -213,7 +235,7 @@ try {
     $stmt_enr->close();
 
     $conn->commit();
-    echo json_encode(['success' => true, 'message' => "Student admitted successfully. Assigned Stream: $student_id", 'student_id' => $student_id]);
+    echo json_encode(['success' => true, 'message' => "Student admitted successfully.Student ID : $student_id, Assigned Level/Class/Stream:$level/$class_grade$stream", 'student_id' => $student_id]);
 
 } catch (Exception $e) {
     if (isset($conn)) $conn->rollback();

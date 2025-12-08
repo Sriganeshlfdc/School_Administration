@@ -27,117 +27,187 @@ $selected_summary_term = get_summary_filter_value('summary_term', 'Term 1');
     <div id="admission-module" class="module" style="display: none;">
     <div class="form-container">
         <h1>Student Admission Application Form</h1>
-        <form id="admission-form">
-              <fieldset>
-                <legend><h3>I. Personal Information</h3></legend>
-              <div class="input-group">
-                  <div class="field half-width"><label for="name" class="required">Name</label><input type="text" id="name" name="name" required></div>
-                  <div class="field half-width"><label for="surname" class="required">Surname</label><input type="text" id="surname" name="surname" required></div>
-                  <div class="field half-width"><label for="dob">Date Of Birth</label><input type="date" id="dob" name="dob"></div>
-                  <div class="field half-width">
-                      <label for="gender" class="required">Gender</label>
-                      <select id="gender" name="gender" required>
-                          <option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
-                      </select>
-                  </div>
-                  <div class="field full-width"><label for="address">Student Address</label><textarea id="address" name="address" rows="3"></textarea></div>
-              </div>
-              </fieldset>
+            <form id="admission-form"> 
+                <fieldset>
+                    <legend>I. Personal Information</legend>
+                    <div class="input-group">
+                        <div class="field half-width">
+                            <label for="name" class="required">First Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="field half-width">
+                            <label for="surname" class="required">Surname</label>
+                            <input type="text" id="surname" name="surname" required>
+                        </div>
+                        <div class="field third-width">
+                            <label for="gender" class="required">Gender</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="field third-width">
+                            <label for="dob">Date Of Birth</label>
+                            <input type="date" id="dob" name="dob">
+                        </div>
 
-             <fieldset>
-               <legend><h3>II. Parents & Guardian Information</h3></legend>
-               
-               <div class="subtitle" style="margin-top:10px; color:var(--primary-color);">Father's Details</div>
-               <div class="input-group">
-                  <div class="field full-width"><label for="father_name" class="required">Father's Name</label><input type="text" id="father_name" name="father_name" required></div>
-                  <div class="field "><label for="father_contact">Father's Contact</label><input type="text" id="father_contact" name="father_contact"></div>
-                  <div class="field"><label for="father_age">Age</label><input type="text" id="father_age" name="father_age"></div>
-                  <div class="field full-width"><label for="father_occupation">Occupation</label><input type="text" id="father_occupation" name="father_occupation"></div>
-                  <div class="field full-width"><label for="father_education">Education</label><input type="text" id="father_education" name="father_education"></div>
-               </div>
+                        <div class="field full-width">
+                            <div class="subtitle">Residential Address</div>
+                        </div>
 
-               <div class="subtitle" style="margin-top:15px; color:var(--primary-color);">Mother's Details</div>
-               <div class="input-group">
-                  <div class="field full-width"><label for="mother_name" class="required">Mother's Name</label><input type="text" id="mother_name" name="mother_name" required></div>
-                  <div class="field"><label for="mother_contact">Mother's Contact</label><input type="text" id="mother_contact" name="mother_contact"></div>
-                  <div class="field"><label for="mother_age">Age</label><input type="text" id="mother_age" name="mother_age"></div>
-                  <div class="field full-width"><label for="mother_occupation">Occupation</label><input type="text" id="mother_occupation" name="mother_occupation"></div>
-                  <div class="field full-width"><label for="mother_education">Education</label><input type="text" id="mother_education" name="mother_education"></div>
-               </div>
+                        <div class="field quarter-width"><label>House No/Block</label><input type="text" name="house_no" placeholder="e.g. 12B"></div>
+                        <div class="field quarter-width"><label>Street/Zone</label><input type="text" name="street" placeholder="Street Name"></div>
+                        <div class="field quarter-width"><label>Village</label><input type="text" name="village" placeholder="Near..."></div>
+                        <div class="field quarter-width"><label>Town/Village</label><input type="text" name="town" placeholder="Town"></div>
 
-               <fieldset>
-                <div class="subtitle" style="margin-top:15px; color:var(--primary-color);">Guardian Details (Optional)</div>
-               <div class="input-group">
-                  <div class="field full-width"><label for="guardian_name">Guardian Name</label><input type="text" id="guardian_name" name="guardian_name"></div>
-                  <div class="field"><label for="guardian_contact">Guardian Contact</label><input type="text" id="guardian_contact" name="guardian_contact"></div>
-                  <div class="field"><label for="guardian_relation">Relation</label>
-                      <select id="guardian_relation" name="guardian_relation">
-                          <option value="">Select Relation</option>
-                          <option value="Brother">Brother</option>
-                          <option value="Sister">Sister</option>
-                          <option value="Uncle">Uncle</option>
-                          <option value="Aunt">Aunt</option>
-                          <option value="Grandparent">Grandparent</option>
-                          <option value="Other">Other</option>
-                      </select>
-                  </div>
-                  <div class="field"><label for="guardian_age">Age</label><input type="text" id="guardian_age" name="guardian_age"></div>
-                  <div class="field"><label for="guardian_occupation">Occupation</label><input type="text" id="guardian_occupation" name="guardian_occupation"></div>
-                  <div class="field full-width"><label for="guardian_address">Guardian Address</label><textarea id="guardian_address" name="guardian_address" rows="2"></textarea></div>
-               </div>
-             </fieldset>
-             </fieldset>
-              <fieldset>
-                <legend><h3>III. Academic Records</h3></legend>
-              <div class="input-group">
-                  <div class="field full-width"><label for="former_school">Former School</label><input type="text" id="former_school" name="former_school"></div>
-                  <div class="field half-width"><label for="ple_index">PLE Index Number</label><input type="text" id="ple_index" name="ple_index"></div>
-                  <div class="field half-width"><label for="ple_agg">PLE Aggregate</label><input type="number" id="ple_agg" name="ple_agg" min="4" max="36"></div>
-                  <div class="field half-width"><label for="uce_index">UCE Index Number</label><input type="text" id="uce_index" name="uce_index"></div>
-                  <div class="field half-width"><label for="uce_result">UCE Result</label><input type="text" id="uce_result" name="uce_result"></div>
-              </div>
-              </fieldset>
+                        <div class="field third-width"><label>District</label><input type="text" name="district"></div>
+                        <div class="field third-width"><label>State/Region</label><input type="text" name="state" ></div>
+                        <div class="field third-width"><label>Country</label><input type="text" name="country" value="Uganda"></div>
+                    </div>
+                </fieldset>
 
-              <fieldset>
-              <legend><h3>IV. Enrollment Details</h3></legend>
-              <div class="input-group">
-                  <div class="field">
-                      <label for="admission_year" class="required">Admission Year</label>
-                      <input type="text" id="admission_year" name="admission_year" value="<?php echo date('Y'); ?>" required>
-                      <small style="color: #666; font-size: 0.8em;">Sets Cohort & Academic Year</small>
-                  </div>
-                  <div class="field"><label for="term" class="required">Term</label><select id="term" name="term" required><option value="">Select Term</option><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option></select></div>
-                  <div class="field"><label for="residence" class="required">Residence</label><select id="residence" name="residence" required><option value="">Select Residence</option><option value="Day">Day</option><option value="Boarding">Boarding</option></select></div>
-                  <div class="field"><label for="entry_status" class="required">Entry Status</label><select id="entry_status" name="entry_status" required><option value="">Select Entry</option><option value="Continuing">Continuing</option><option value="New">New</option></select></div>
-                  <div class="field"><label for="level" class="required">Level</label><select id="level" name="level" required><option value="">Select Level</option><option value="pre-primary">Pre-Primary</option><option value="primary">Primary</option><option value="secondary">Secondary</option></select></div>
-                  <div class="field"><label for="class" class="required">Class</label><select id="class" name="class" required><option value="">Select Class</option></select></div>
-                  <div class="field half-width">
-                      <label for="stream">Stream</label>
-                      <select id="stream" name="stream">
-                          <option value="">Select Stream</option>
-                          <?php 
-                          $streams = getStreamOptions();
-                          foreach($streams as $st) echo "<option value='$st'>$st</option>"; 
-                          ?>
-                      </select>
-                  </div>
-              </div>
-              </fieldset>
+                <fieldset>
+                    <legend>II. Parents & Guardian</legend>
 
-              <fieldset>
-              <legend><h3>V. Additional Information</h3></legend>
-              <div class="input-group">
-                  <div class="field half-width"><label for="more_info">More Information</label><textarea id="more_info" name="more_info" rows="3"></textarea></div>
-                  <div class="field half-width"><label for="photo">Student Photo</label><div class="photo-upload"><input type="file" id="photo" name="photo" accept="image/*"><p>(Max 5MB)</p></div></div>
-              </div>
-              </fieldset>
-              
-             <div class="button-wrapper">
-              <button type="button" id="admission-reset-btn" class="btn-primary">Reset</button>
-               <button type="submit" class="btn-primary">Submit </button>
-             </div>
-          </form>
-      </div>
+                    <div class="subtitle"> Father's Details</div>
+                    <div class="input-group">
+                        <div class="field half-width"><label class="required">Name</label><input type="text" name="father_name" required></div>
+                        <div class="field quarter-width"><label>Age</label><input type="number" name="father_age" id="age"></div>
+                        <div class="field half-width"><label>Contact</label><input type="text" name="father_contact"></div>
+                        <div class="field half-width"><label>Email</label><input type="email" name="father_email" placeholder="email@example.com"></div>
+                        <div class="field half-width"><label>Occupation</label><input type="text" name="father_occupation"></div>
+                        <div class="field half-width"><label>Education</label><input type="text" name="father_education"></div>
+                    </div>
+
+                    <div class="subtitle mt-3">Mother's Details</div>
+                    <div class="input-group">
+                        <div class="field half-width"><label class="required">Name</label><input type="text" name="mother_name" required></div>
+                        <div class="field quarter-width"><label>Age</label><input type="number" name="mother_age" id="age"></div>
+                        <div class="field half-width"><label>Contact</label><input type="text" name="mother_contact"></div>
+                        <div class="field half-width"><label>Email</label><input type="email" name="mother_email" placeholder="email@example.com"></div>
+                        <div class="field half-width"><label>Occupation</label><input type="text" name="mother_occupation"></div>
+                        <div class="field half-width"><label>Education</label><input type="text" name="mother_education"></div>
+                    </div>
+
+                    <fieldset class="nested-fieldset mt-3">
+                        <legend>Guardian (Optional)</legend>
+                        <div class="input-group">
+                            <div class="field half-width"><label>Name</label><input type="text" name="guardian_name"></div>
+                            <div class="field quarter-width"><label>Age</label><input type="number" name="guardian_age" id="age"></div>
+                            <div class="field third-width"><label>Contact</label><input type="text" name="guardian_contact"></div>
+                            <div class="field third-width"><label>Email</label><input type="email" name="guardian_email"></div>
+
+                            <div class="field quarter-width">
+                                <label>Relation</label>
+                                <select name="guardian_relation">
+                                    <option value="">Select</option>
+                                    <option value="Uncle">Uncle</option>
+                                    <option value="Aunt">Aunt</option>
+                                    <option value="Grandparent">Grandparent</option>
+                                    <option value="Brother">Brother</option>
+                                    <option value="Sister">Sister</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="field third-width"><label>Occupation</label><input type="text" name="guardian_occupation"></div>
+                            <div class="field full-width"><label>Address</label><input type="text" name="guardian_address" placeholder="If different from student"></div>
+                        </div>
+                    </fieldset>
+                </fieldset>
+
+                <fieldset>
+                    <legend>III. Academic History</legend>
+                    <div class="input-group">
+                        <div class="field full-width"><label>Former School</label><input type="text" name="former_school"></div>
+                        <div class="field quarter-width"><label>PLE Index</label><input type="text" name="ple_index"></div>
+                        <div class="field quarter-width"><label>PLE Agg</label><input type="number" name="ple_agg" id="ple_agg"></div>
+                        <div class="field quarter-width"><label>UCE Index</label><input type="text" name="uce_index"></div>
+                        <div class="field quarter-width"><label>UCE Result</label><input type="text" name="uce_result"></div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>IV. Enrollment Details</legend>
+                    <div class="input-group">
+                        <div class="field quarter-width">
+                            <label class="required">Admsn Year</label>
+                            <input type="text" name="admission_year" value="<?php echo date('Y'); ?>" required>
+                        </div>
+                        <div class="field quarter-width">
+                            <label class="required">Term</label>
+                            <select name="term" required>
+                                <option value="Term 1">Term 1</option>
+                                <option value="Term 2">Term 2</option>
+                                <option value="Term 3">Term 3</option>
+                            </select>
+                        </div>
+                        <div class="field quarter-width">
+                            <label class="required">Level</label>
+                            <select id="level" name="level" required>
+                                <option value="">Select</option>
+                                <option value="pre-primary">Pre-Primary</option>
+                                <option value="primary">Primary</option>
+                                <option value="secondary">Secondary</option>
+                            </select>
+                        </div>
+                        <div class="field quarter-width"><label class="required">Class</label><select id="class" name="class" required><option value="">Select</option></select></div>
+
+                        <div class="field quarter-width">
+                            <label>Stream</label>
+                            <select id="stream" name="stream">
+                                <option value="">Select</option>
+                                <?php foreach(getStreamOptions() as $st) echo "<option value='$st'>$st</option>"; ?>
+                            </select>
+                        </div>
+                        <div class="field quarter-width">
+                            <label class="required">Residence</label>
+                            <select name="residence" required>
+                                <option value="Day">Day</option>
+                                <option value="Boarding">Boarding</option>
+                            </select>
+                        </div>
+                        <div class="field quarter-width">
+                            <label class="required">Entry Status</label>
+                            <select name="entry_status" required>
+                                <option value="New">New</option>
+                                <option value="Continuing">Continuing</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>V. Photo & Extras</legend>
+                    <div class="input-group">
+                        <div class="field half-width">
+                            <label>More Information</label>
+                            <textarea name="more_info" rows="4" class="text-area-medium"></textarea>
+                        </div>
+                        <div class="field half-width">
+                            <label>Student Photo</label>
+                            <div id="admission-photo-wrapper">
+                                <div class="photo-upload" id="admission-photo-container">
+                                    <div id="upload-placeholder" class="upload-placeholder-content">
+                                        <i class="fa fa-camera upload-icon"></i>
+                                        <p class="upload-text">Click to Upload</p>
+                                        <span class="upload-note">(Max 5MB)</span>
+                                    </div>
+                                    <input type="file" id="photo" name="photo" accept="image/*">
+                                </div>
+                                <img id="admission-photo-preview" class="photo-preview-side" src="" alt="Preview">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <div class="button-wrapper">
+                    <button type="button" id="admission-reset-btn" class="btn-primary btn-gray">Reset</button>
+                    <button type="submit" class="btn-primary">Submit Admission</button>
+                </div>
+            </form>
+        </div>
     </div>
       <div id="list-module" class="module" style="display: none;">
           <div class="viewer-container">
@@ -183,9 +253,9 @@ $selected_summary_term = get_summary_filter_value('summary_term', 'Term 1');
                 <div class="field-group"><label for="filter-term">Term</label><select id="filter-term" name="term"><option value="">All</option><option value="Term 1">Term 1</option><option value="Term 2">Term 2</option><option value="Term 3">Term 3</option></select></div>
                 <div class="field-group"><label for="filter-year">Year</label><select id="filter-year" name="admission_year"><option value="">All</option><option value="2025">2025</option><option value="2024">2024</option></select></div>
                 
-                <div class="button-wrapper" style="align-self:flex-end;">
+                <div class="button-wrapper align-self-end">
                     <button type="submit" class="btn-primary">Search</button>
-                    <button type="button" id="reset-filter-btn" class="btn-primary" style="background: #6c757d;">Reset</button>
+                    <button type="button" id="reset-filter-btn" class="btn-primary btn-gray">Reset</button>
                 </div>
             </form>
 

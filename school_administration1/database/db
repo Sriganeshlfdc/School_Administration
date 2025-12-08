@@ -1,7 +1,7 @@
 -- 1. Select Database
 USE school_administration;
 
--- 2. Disable Foreign Key Checks (to allow dropping tables freely)
+-- 2. Disable Foreign Key Checks
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 3. Drop All Tables
@@ -17,6 +17,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 5. Re-Create Tables
 
 -- Table: Students
+-- Updated: 'CurrentAddress' removed. [cite_start]Split address columns added after 'Gender'. [cite: 4]
 CREATE TABLE `students` (
   `StudentID` int(11) NOT NULL AUTO_INCREMENT,
   `AdmissionYear` year(4) NOT NULL,
@@ -24,13 +25,22 @@ CREATE TABLE `students` (
   `Surname` varchar(100) NOT NULL,
   `DateOfBirth` date NOT NULL,
   `Gender` varchar(10) NOT NULL,
-  `CurrentAddress` text DEFAULT NULL,
+  
+  -- Split Address Columns
+  `HouseNo` VARCHAR(50) DEFAULT NULL,
+  `Street` VARCHAR(100) DEFAULT NULL,
+  `Village` VARCHAR(100) DEFAULT NULL,
+  `Town` VARCHAR(100) DEFAULT NULL, 
+  `District` VARCHAR(100) DEFAULT NULL,
+  `State` VARCHAR(100) DEFAULT NULL,
+  `Country` VARCHAR(100) DEFAULT 'Uganda',
+  
   `PhotoPath` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`StudentID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table: Parents (renamed from Guardian)
--- UPDATED: father_name and mother_name set to NOT NULL to enforce data integrity
+-- Table: Parents
+-- Updated: Added email columns for father, mother, and guardian. [cite: 5, 6]
 CREATE TABLE `parents` (
   `ParentId` int(11) NOT NULL AUTO_INCREMENT,
   `StudentID` int(11) NOT NULL,
@@ -39,6 +49,7 @@ CREATE TABLE `parents` (
   `father_name` varchar(255) NOT NULL, 
   `father_age` int(11) DEFAULT NULL,
   `father_contact` varchar(50) DEFAULT NULL,
+  `father_email` VARCHAR(150) DEFAULT NULL, -- Added
   `father_occupation` varchar(100) DEFAULT NULL,
   `father_education` varchar(100) DEFAULT NULL,
   
@@ -46,14 +57,16 @@ CREATE TABLE `parents` (
   `mother_name` varchar(255) NOT NULL,
   `mother_age` int(11) DEFAULT NULL,
   `mother_contact` varchar(50) DEFAULT NULL,
+  `mother_email` VARCHAR(150) DEFAULT NULL, -- Added
   `mother_occupation` varchar(100) DEFAULT NULL,
   `mother_education` varchar(100) DEFAULT NULL,
   
-  -- General guardian details
+  -- Guardian details
   `guardian_name` varchar(255) DEFAULT NULL,
   `guardian_relation` ENUM('Father','Mother','Uncle','Aunt','Grandparent','Other') DEFAULT NULL,
   `guardian_age` int(11) DEFAULT NULL,
   `guardian_contact` varchar(50) DEFAULT NULL,
+  `guardian_email` VARCHAR(150) DEFAULT NULL, -- Added
   `guardian_occupation` varchar(100) DEFAULT NULL,
   `guardian_education` varchar(100) DEFAULT NULL,
   `guardian_address` text DEFAULT NULL,
@@ -66,7 +79,7 @@ CREATE TABLE `parents` (
   CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table: Enrollment
+-- Table: Enrollment [cite: 7]
 CREATE TABLE `enrollment` (
   `EnrollmentID` int(11) NOT NULL AUTO_INCREMENT,
   `StudentID` int(11) NOT NULL,
@@ -81,8 +94,7 @@ CREATE TABLE `enrollment` (
   KEY `StudentID` (`StudentID`),
   CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Table: AcademicHistory
+-- Table: AcademicHistory [cite: 8]
 CREATE TABLE `academichistory` (
   `HistoryID` int(11) NOT NULL AUTO_INCREMENT,
   `StudentID` int(11) NOT NULL,
@@ -96,7 +108,7 @@ CREATE TABLE `academichistory` (
   CONSTRAINT `academichistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table: EnrollmentHistory (For Migration Logs)
+-- Table: EnrollmentHistory [cite: 9]
 CREATE TABLE `enrollmenthistory` (
   `HistoryID` int(11) NOT NULL AUTO_INCREMENT,
   `StudentID` int(11) NOT NULL,
