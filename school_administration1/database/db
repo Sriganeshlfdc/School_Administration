@@ -1,0 +1,114 @@
+-- 1. Select Database
+USE school_administration;
+
+-- 2. Disable Foreign Key Checks (to allow dropping tables freely)
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 3. Drop All Tables
+DROP TABLE IF EXISTS `enrollmenthistory`;
+DROP TABLE IF EXISTS `academichistory`;
+DROP TABLE IF EXISTS `enrollment`;
+DROP TABLE IF EXISTS `parents`;
+DROP TABLE IF EXISTS `students`;
+
+-- 4. Re-enable Foreign Key Checks
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 5. Re-Create Tables
+
+-- Table: Students
+CREATE TABLE `students` (
+  `StudentID` int(11) NOT NULL AUTO_INCREMENT,
+  `AdmissionYear` year(4) NOT NULL,
+  `Name` varchar(100) DEFAULT NULL,
+  `Surname` varchar(100) NOT NULL,
+  `DateOfBirth` date NOT NULL,
+  `Gender` varchar(10) NOT NULL,
+  `CurrentAddress` text DEFAULT NULL,
+  `PhotoPath` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`StudentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: Parents (renamed from Guardian)
+-- UPDATED: father_name and mother_name set to NOT NULL to enforce data integrity
+CREATE TABLE `parents` (
+  `ParentId` int(11) NOT NULL AUTO_INCREMENT,
+  `StudentID` int(11) NOT NULL,
+  
+  -- Father details
+  `father_name` varchar(255) NOT NULL, 
+  `father_age` int(11) DEFAULT NULL,
+  `father_contact` varchar(50) DEFAULT NULL,
+  `father_occupation` varchar(100) DEFAULT NULL,
+  `father_education` varchar(100) DEFAULT NULL,
+  
+  -- Mother details
+  `mother_name` varchar(255) NOT NULL,
+  `mother_age` int(11) DEFAULT NULL,
+  `mother_contact` varchar(50) DEFAULT NULL,
+  `mother_occupation` varchar(100) DEFAULT NULL,
+  `mother_education` varchar(100) DEFAULT NULL,
+  
+  -- General guardian details
+  `guardian_name` varchar(255) DEFAULT NULL,
+  `guardian_relation` ENUM('Father','Mother','Uncle','Aunt','Grandparent','Other') DEFAULT NULL,
+  `guardian_age` int(11) DEFAULT NULL,
+  `guardian_contact` varchar(50) DEFAULT NULL,
+  `guardian_occupation` varchar(100) DEFAULT NULL,
+  `guardian_education` varchar(100) DEFAULT NULL,
+  `guardian_address` text DEFAULT NULL,
+  
+  -- Added Column
+  `MoreInformation` text DEFAULT NULL,
+  
+  PRIMARY KEY (`ParentId`),
+  KEY `StudentID` (`StudentID`),
+  CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: Enrollment
+CREATE TABLE `enrollment` (
+  `EnrollmentID` int(11) NOT NULL AUTO_INCREMENT,
+  `StudentID` int(11) NOT NULL,
+  `AcademicYear` VARCHAR(20) NOT NULL,
+  `Level` varchar(50) NOT NULL,
+  `Class` varchar(50) NOT NULL,
+  `Term` varchar(50) NOT NULL,
+  `Stream` varchar(50) DEFAULT NULL,
+  `Residence` varchar(50) NOT NULL,
+  `EntryStatus` varchar(50) NOT NULL,
+  PRIMARY KEY (`EnrollmentID`),
+  KEY `StudentID` (`StudentID`),
+  CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: AcademicHistory
+CREATE TABLE `academichistory` (
+  `HistoryID` int(11) NOT NULL AUTO_INCREMENT,
+  `StudentID` int(11) NOT NULL,
+  `FormerSchool` varchar(255) DEFAULT NULL,
+  `PLEIndexNumber` varchar(50) DEFAULT NULL,
+  `PLEAggregate` int(11) DEFAULT NULL,
+  `UCEIndexNumber` varchar(50) DEFAULT NULL,
+  `UCEResult` text DEFAULT NULL,
+  PRIMARY KEY (`HistoryID`),
+  KEY `StudentID` (`StudentID`),
+  CONSTRAINT `academichistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: EnrollmentHistory (For Migration Logs)
+CREATE TABLE `enrollmenthistory` (
+  `HistoryID` int(11) NOT NULL AUTO_INCREMENT,
+  `StudentID` int(11) NOT NULL,
+  `AcademicYear` VARCHAR(20) NOT NULL,
+  `Level` varchar(50) NOT NULL,
+  `Class` varchar(50) NOT NULL,
+  `Term` varchar(50) NOT NULL,
+  `Stream` varchar(50) DEFAULT NULL,
+  `Residence` varchar(50) NOT NULL,
+  `EntryStatus` varchar(50) NOT NULL,
+  `DateMoved` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`HistoryID`),
+  KEY `StudentID` (`StudentID`),
+  CONSTRAINT `enrollmenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

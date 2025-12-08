@@ -1,0 +1,218 @@
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS `GenerateStrictUgandanData`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateStrictUgandanData`()
+BEGIN
+    -- =========================================================================
+    -- 1. VARIABLE DECLARATION
+    -- =========================================================================
+    
+    -- Counters
+    DECLARE c_idx INT DEFAULT 1;  -- Class Loop (1-16)
+    DECLARE s_idx INT DEFAULT 1;  -- Stream Loop (1-5)
+    DECLARE stu_idx INT DEFAULT 1; -- Student Loop (1-10)
+    
+    -- Student Data
+    DECLARE v_student_id INT;
+    DECLARE v_class VARCHAR(10);
+    DECLARE v_level VARCHAR(20);
+    DECLARE v_stream VARCHAR(1);
+    DECLARE v_gender VARCHAR(10);
+    DECLARE v_surname VARCHAR(50);
+    DECLARE v_name VARCHAR(50);
+    DECLARE v_dob DATE;
+    DECLARE v_address VARCHAR(100);
+    DECLARE v_photo VARCHAR(255);
+    
+    -- Parent Data (Mandatory)
+    DECLARE v_father_name VARCHAR(100);
+    DECLARE v_father_contact VARCHAR(20);
+    DECLARE v_father_age INT;
+    DECLARE v_father_occ VARCHAR(50);
+    DECLARE v_father_edu VARCHAR(50);
+    
+    DECLARE v_mother_name VARCHAR(100);
+    DECLARE v_mother_contact VARCHAR(20);
+    DECLARE v_mother_age INT;
+    DECLARE v_mother_occ VARCHAR(50);
+    DECLARE v_mother_edu VARCHAR(50);
+    
+    -- Guardian Data (Optional: All-or-Nothing)
+    DECLARE v_has_guardian INT;
+    DECLARE v_guardian_name VARCHAR(100);
+    DECLARE v_guardian_contact VARCHAR(20);
+    DECLARE v_guardian_rel VARCHAR(20);
+    DECLARE v_guardian_age INT;
+    DECLARE v_guardian_occ VARCHAR(50);
+    DECLARE v_guardian_edu VARCHAR(50);
+    DECLARE v_guardian_addr VARCHAR(100);
+    
+    -- Academic & Enrollment
+    DECLARE v_former_school VARCHAR(100);
+    DECLARE v_ple_idx VARCHAR(50);
+    DECLARE v_ple_agg INT;
+    DECLARE v_uce_idx VARCHAR(50);
+    DECLARE v_uce_res VARCHAR(20);
+    
+    -- Fixed/Calculated Fields
+    DECLARE v_adm_year INT DEFAULT 2025; -- Fixed Admission Year
+    DECLARE v_academic_year VARCHAR(20); -- Format: 2025-26
+    DECLARE v_term VARCHAR(20);
+    DECLARE v_residence VARCHAR(20);
+    DECLARE v_entry_status VARCHAR(20);
+    DECLARE v_more_info TEXT;
+
+    -- Set Academic Year String (2025 -> 2025-26)
+    SET v_academic_year = CONCAT(v_adm_year, '-', SUBSTRING(v_adm_year + 1, 3, 2));
+
+    -- =========================================================================
+    -- 2. GENERATION LOGIC
+    -- =========================================================================
+    
+    -- LOOP CLASSES (PP1 to S6 = 16 Classes)
+    SET c_idx = 1;
+    WHILE c_idx <= 16 DO
+        
+        -- Map Index to Class/Level
+        IF c_idx = 1 THEN SET v_class = 'PP.1'; SET v_level = 'Pre-Primary';
+        ELSEIF c_idx = 2 THEN SET v_class = 'PP.2'; SET v_level = 'Pre-Primary';
+        ELSEIF c_idx = 3 THEN SET v_class = 'PP.3'; SET v_level = 'Pre-Primary';
+        ELSEIF c_idx = 4 THEN SET v_class = 'P.1'; SET v_level = 'Primary';
+        ELSEIF c_idx = 5 THEN SET v_class = 'P.2'; SET v_level = 'Primary';
+        ELSEIF c_idx = 6 THEN SET v_class = 'P.3'; SET v_level = 'Primary';
+        ELSEIF c_idx = 7 THEN SET v_class = 'P.4'; SET v_level = 'Primary';
+        ELSEIF c_idx = 8 THEN SET v_class = 'P.5'; SET v_level = 'Primary';
+        ELSEIF c_idx = 9 THEN SET v_class = 'P.6'; SET v_level = 'Primary';
+        ELSEIF c_idx = 10 THEN SET v_class = 'P.7'; SET v_level = 'Primary';
+        ELSEIF c_idx = 11 THEN SET v_class = 'S.1'; SET v_level = 'Secondary';
+        ELSEIF c_idx = 12 THEN SET v_class = 'S.2'; SET v_level = 'Secondary';
+        ELSEIF c_idx = 13 THEN SET v_class = 'S.3'; SET v_level = 'Secondary';
+        ELSEIF c_idx = 14 THEN SET v_class = 'S.4'; SET v_level = 'Secondary';
+        ELSEIF c_idx = 15 THEN SET v_class = 'S.5'; SET v_level = 'Secondary';
+        ELSEIF c_idx = 16 THEN SET v_class = 'S.6'; SET v_level = 'Secondary';
+        END IF;
+
+        -- LOOP STREAMS (A, B, C, D, E)
+        SET s_idx = 1;
+        WHILE s_idx <= 5 DO
+            SET v_stream = ELT(s_idx, 'A', 'B', 'C', 'D', 'E');
+
+            -- LOOP STUDENTS (Exactly 10 per stream = 50 per class)
+            SET stu_idx = 1;
+            WHILE stu_idx <= 10 DO
+                
+                -- A. STUDENT IDENTITY
+                SET v_gender = IF(FLOOR(RAND()*2)=1, 'Male', 'Female');
+                SET v_surname = ELT(FLOOR(1 + (RAND() * 20)), 'Kato', 'Mukasa', 'Okello', 'Akello', 'Namukasa', 'Musoke', 'Mugabe', 'Kyomuhendo', 'Nalubega', 'Ochieng', 'Lwanga', 'Nantogo', 'Opio', 'Aine', 'Busingye', 'Ssemwogerere', 'Nakato', 'Waiswa', 'Byaruhanga', 'Tumusiime');
+                
+                IF v_gender = 'Male' THEN
+                    SET v_name = ELT(FLOOR(1 + (RAND() * 15)), 'John', 'David', 'Moses', 'Isaac', 'Brian', 'Joseph', 'Paul', 'Ivan', 'Samuel', 'Daniel', 'Solomon', 'Timothy', 'Mark', 'Andrew', 'Peter');
+                ELSE
+                    SET v_name = ELT(FLOOR(1 + (RAND() * 15)), 'Mary', 'Sarah', 'Grace', 'Joy', 'Pritah', 'Esther', 'Joan', 'Sandra', 'Ritah', 'Mercy', 'Doreen', 'Rebecca', 'Alice', 'Brenda', 'Winnie');
+                END IF;
+
+                -- DOB between 2005 and 2010
+                SET v_dob = DATE_ADD('2005-01-01', INTERVAL FLOOR(RAND() * 1825) DAY); 
+                SET v_address = ELT(FLOOR(1 + (RAND() * 10)), 'Kampala', 'Gulu', 'Mbale', 'Jinja', 'Mbarara', 'Arua', 'Fort Portal', 'Masaka', 'Soroti', 'Lira');
+                
+                -- Placeholder photo path
+                SET v_photo = 'static/images/default_profile.png'; 
+
+                -- INSERT STUDENT
+                INSERT INTO students (AdmissionYear, Name, Surname, DateOfBirth, Gender, CurrentAddress, PhotoPath)
+                VALUES (v_adm_year, v_name, v_surname, v_dob, v_gender, v_address, v_photo);
+                
+                SET v_student_id = LAST_INSERT_ID();
+
+                -- B. PARENT DETAILS (Mandatory)
+                -- Father
+                SET v_father_name = CONCAT(ELT(FLOOR(1 + (RAND() * 15)), 'John', 'David', 'Moses', 'Isaac', 'Brian', 'Joseph', 'Paul', 'Ivan', 'Samuel', 'Daniel', 'Solomon', 'Timothy', 'Mark', 'Andrew', 'Peter'), ' ', v_surname);
+                SET v_father_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
+                SET v_father_age = FLOOR(30 + (RAND() * 40)); -- 30-70
+                SET v_father_occ = ELT(FLOOR(1 + (RAND() * 9)), 'Teacher', 'Farmer', 'Doctor', 'Engineer', 'Driver', 'Shopkeeper', 'Civil Servant', 'Carpenter', 'Mechanic');
+                SET v_father_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
+
+                -- Mother
+                SET v_mother_name = CONCAT(ELT(FLOOR(1 + (RAND() * 15)), 'Mary', 'Sarah', 'Grace', 'Joy', 'Pritah', 'Esther', 'Joan', 'Sandra', 'Ritah', 'Mercy', 'Doreen', 'Rebecca', 'Alice', 'Brenda', 'Winnie'), ' ', ELT(FLOOR(1 + (RAND() * 20)), 'Kato', 'Mukasa', 'Okello', 'Akello', 'Namukasa', 'Musoke', 'Mugabe', 'Kyomuhendo', 'Nalubega', 'Ochieng', 'Lwanga', 'Nantogo', 'Opio', 'Aine', 'Busingye', 'Ssemwogerere', 'Nakato', 'Waiswa', 'Byaruhanga', 'Tumusiime'));
+                SET v_mother_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
+                SET v_mother_age = FLOOR(28 + (RAND() * 37)); -- 28-65
+                SET v_mother_occ = ELT(FLOOR(1 + (RAND() * 8)), 'Nurse', 'Farmer', 'Teacher', 'Tailor', 'Trader', 'Civil Servant', 'Housewife', 'Entrepreneur');
+                SET v_mother_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
+
+                -- C. GUARDIAN (All-or-Nothing Logic: 30% chance of having a guardian)
+                IF RAND() < 0.3 THEN
+                    SET v_guardian_name = CONCAT(ELT(FLOOR(1 + (RAND() * 10)), 'James', 'Charles', 'Patrick', 'Robert', 'Susan', 'Hellen', 'Florence', 'Alice', 'Rose', 'Lillian'), ' ', v_surname);
+                    SET v_guardian_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
+                    SET v_guardian_rel = ELT(FLOOR(1 + (RAND() * 6)), 'Father', 'Mother', 'Uncle', 'Aunt', 'Grandparent', 'Other');
+                    SET v_guardian_age = FLOOR(25 + (RAND() * 55));
+                    SET v_guardian_occ = ELT(FLOOR(1 + (RAND() * 9)), 'Teacher', 'Farmer', 'Doctor', 'Engineer', 'Driver', 'Shopkeeper', 'Civil Servant', 'Carpenter', 'Mechanic');
+                    SET v_guardian_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
+                    SET v_guardian_addr = v_address;
+                ELSE
+                    SET v_guardian_name = NULL;
+                    SET v_guardian_contact = NULL;
+                    SET v_guardian_rel = NULL;
+                    SET v_guardian_age = NULL;
+                    SET v_guardian_occ = NULL;
+                    SET v_guardian_edu = NULL;
+                    SET v_guardian_addr = NULL;
+                END IF;
+
+                SET v_more_info = ELT(FLOOR(1 + (RAND() * 5)), 'Active in debate club', 'Prefect', 'Choir member', 'Football team', 'Science fair participant');
+
+                -- INSERT PARENTS
+                INSERT INTO parents (
+                    StudentID, 
+                    father_name, father_age, father_contact, father_occupation, father_education,
+                    mother_name, mother_age, mother_contact, mother_occupation, mother_education,
+                    guardian_name, guardian_relation, guardian_contact, guardian_age, guardian_occupation, guardian_education, guardian_address,
+                    MoreInformation
+                ) VALUES (
+                    v_student_id,
+                    v_father_name, v_father_age, v_father_contact, v_father_occ, v_father_edu,
+                    v_mother_name, v_mother_age, v_mother_contact, v_mother_occ, v_mother_edu,
+                    v_guardian_name, v_guardian_rel, v_guardian_contact, v_guardian_age, v_guardian_occ, v_guardian_edu, v_guardian_addr,
+                    v_more_info
+                );
+
+                -- D. ACADEMIC RECORDS (Mandatory)
+                SET v_former_school = ELT(FLOOR(1 + (RAND() * 5)), 'Namilyango School', 'Gayaza High School', 'Ntare School', 'Buddo Junior', 'Greenhill Academy');
+                
+                -- Generate Random PLE/UCE numbers
+                SET v_ple_idx = CONCAT('PLE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
+                SET v_ple_agg = FLOOR(4 + (RAND() * 32)); -- 4 to 36
+                
+                SET v_uce_idx = CONCAT('UCE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
+                SET v_uce_res = ELT(FLOOR(1 + (RAND() * 4)), 'Division I', 'Division II', 'Division III', 'Division IV');
+
+                INSERT INTO academichistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
+                VALUES (v_student_id, v_former_school, v_ple_idx, v_ple_agg, v_uce_idx, v_uce_res);
+
+                -- E. ENROLLMENT (Strict Rules)
+                -- Admission Year fixed at 2025 (in Students table)
+                -- Academic Year stored as 2025-26
+                SET v_term = ELT(FLOOR(1 + (RAND() * 3)), 'Term 1', 'Term 2', 'Term 3');
+                SET v_residence = IF(RAND() > 0.5, 'Boarding', 'Day');
+                SET v_entry_status = IF(v_class = 'P.1' OR v_class = 'S.1' OR v_class = 'PP.1', 'New', 'Continuing');
+
+                INSERT INTO enrollment (StudentID, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus)
+                VALUES (v_student_id, v_academic_year, v_level, v_class, v_term, v_stream, v_residence, v_entry_status);
+
+                SET stu_idx = stu_idx + 1;
+            END WHILE; -- End Student Loop
+
+            SET s_idx = s_idx + 1;
+        END WHILE; -- End Stream Loop
+
+        SET c_idx = c_idx + 1;
+    END WHILE; -- End Class Loop
+
+END$$
+
+DELIMITER ;
+
+-- =============================================================================
+-- 3. EXECUTE THE GENERATOR
+-- =============================================================================
+CALL GenerateStrictUgandanData();
