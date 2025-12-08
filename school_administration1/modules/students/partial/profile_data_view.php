@@ -1,8 +1,17 @@
 <?php
-// webpages/includes/profile_data_view.php
+// modules/students/partial/profile_data_view.php
 $h = fn($v) => htmlspecialchars($v ?? '');
 $d = fn($v) => htmlspecialchars($v ?? 'N/A');
 $s = $student_data;
+
+// Logic to display address from split fields
+$displayAddress = '';
+if (!empty($s['HouseNo'])) $displayAddress .= $s['HouseNo'] . ' ';
+if (!empty($s['Street'])) $displayAddress .= $s['Street'] . ', ';
+if (!empty($s['Village'])) $displayAddress .= $s['Village'] . ', ';
+if (!empty($s['Town'])) $displayAddress .= $s['Town'] . ' ';
+if (!empty($s['District'])) $displayAddress .= '(' . $s['District'] . ')';
+if (empty(trim($displayAddress))) $displayAddress = 'N/A';
 ?>
 
 <div class="profile-grid-system">
@@ -14,8 +23,8 @@ $s = $student_data;
             <div class="grid-item"><strong>Surname</strong> <p id="v-surname"><?php echo $h($s['Surname']); ?></p></div>
             <div class="grid-item"><strong>Date of Birth</strong> <p id="v-dob"><?php echo $h($s['DateOfBirth']); ?></p></div>
             <div class="grid-item"><strong>Gender</strong> <p id="v-gender"><?php echo $h($s['Gender']); ?></p></div>
-            <div class="grid-item"><strong>Admission year</strong> <p id="v-gender"><?php echo $h($s['AdmissionYear']); ?></p></div>
-            <div class="grid-item"><strong>Address</strong> <p id="v-address"><?php echo $h($s['Address']); ?></p></div>
+            <div class="grid-item"><strong>Admission year</strong> <p><?php echo $h($s['AdmissionYear']); ?></p></div>
+            <div class="grid-item"><strong>Address</strong> <p id="v-address"><?php echo $h($displayAddress); ?></p></div>
         </div>
     </fieldset>
 
@@ -24,7 +33,7 @@ $s = $student_data;
         <div class="grid-row">
             <div class="grid-item"><strong>Name</strong> <p><?php echo $d($s['father_name']); ?></p></div>
             <div class="grid-item"><strong>Contact</strong> <p><?php echo $d($s['father_contact']); ?></p></div>
-            <div class="grid-item"><strong>Age</strong> <p><?php echo $d($s['father_age']); ?></p></div>
+            <div class="grid-item"><strong>Email</strong> <p><?php echo $d($s['father_email']); ?></p></div>
             <div class="grid-item"><strong>Occupation</strong> <p><?php echo $d($s['father_occupation']); ?></p></div>
             <div class="grid-item"><strong>Education</strong> <p><?php echo $d($s['father_education']); ?></p></div>
         </div>
@@ -35,7 +44,7 @@ $s = $student_data;
         <div class="grid-row">
             <div class="grid-item"><strong>Name</strong> <p><?php echo $d($s['mother_name']); ?></p></div>
             <div class="grid-item"><strong>Contact</strong> <p><?php echo $d($s['mother_contact']); ?></p></div>
-            <div class="grid-item"><strong>Age</strong> <p><?php echo $d($s['mother_age']); ?></p></div>
+            <div class="grid-item"><strong>Email</strong> <p><?php echo $d($s['mother_email']); ?></p></div>
             <div class="grid-item"><strong>Occupation</strong> <p><?php echo $d($s['mother_occupation']); ?></p></div>
             <div class="grid-item"><strong>Education</strong> <p><?php echo $d($s['mother_education']); ?></p></div>
         </div>
@@ -46,6 +55,7 @@ $s = $student_data;
         <div class="grid-row">
             <div class="grid-item"><strong>Name</strong> <p><?php echo $d($s['guardian_name']); ?></p></div>
             <div class="grid-item"><strong>Contact</strong> <p><?php echo $d($s['guardian_contact']); ?></p></div>
+            <div class="grid-item"><strong>Email</strong> <p><?php echo $d($s['guardian_email']); ?></p></div>
             <div class="grid-item"><strong>Relation</strong> <p><?php echo $d($s['guardian_relation']); ?></p></div>
             <div class="grid-item"><strong>Address</strong> <p><?php echo $d($s['guardian_address']); ?></p></div>
              <div class="grid-item full-width"><strong>Notes</strong> <p><?php echo nl2br($h($s['GuardianNotes'])); ?></p></div>

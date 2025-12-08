@@ -55,7 +55,7 @@ if ($conn) {
         if (!empty($filter_gender)) { $sql .= " AND S.Gender = ?"; $types .= 's'; $params[] = $filter_gender; }
     }
 
-    $sql .= " ORDER BY S.StudentID DESC LIMIT 200";
+    $sql .= " ORDER BY E.Level ASC, E.Class ASC, E.Stream ASC, S.Name ASC LIMIT 200";
 
     $stmt = $conn->prepare($sql);
     if ($stmt) {

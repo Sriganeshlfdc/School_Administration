@@ -4,6 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("STATUS: Student.js loaded.");
 
     // =========================================================================
+    // 0. FORCE RESET ON LOAD
+    // =========================================================================
+    const filterFormOnLoad = document.getElementById('student-filter-form');
+    if (filterFormOnLoad) {
+        filterFormOnLoad.reset();
+        filterFormOnLoad.setAttribute("autocomplete", "off"); // Prevent browser autofill
+    }
+
+    // =========================================================================
     // 1. DEFINE HELPER FUNCTIONS
     // =========================================================================
 
@@ -88,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if(data.success) {
                 window.showCustomAlert('success', 'Admission Complete', data.message);
-                form.reset(); // This trigger the 'reset' event listener below
+                form.reset(); 
             } else {
                 window.showCustomAlert('error', 'Admission Failed', data.message);
             }
@@ -106,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // =========================================================================
-    // 3. PHOTO UPLOAD LOGIC (Correctly placed outside handlers)
+    // 3. PHOTO UPLOAD LOGIC
     // =========================================================================
     const photoInput = document.getElementById('photo');
     const photoWrapper = document.getElementById('admission-photo-wrapper');
@@ -114,71 +123,95 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeholder = document.getElementById('upload-placeholder');
     const admissionForm = document.getElementById('admission-form');
 
-    // Helper to Reset UI
     function resetPhotoUI() {
         if (photoWrapper) photoWrapper.classList.remove('has-file');
-        
         if (previewImg) {
             previewImg.src = '';
             previewImg.style.display = 'none';
         }
-        
         if (placeholder) {
-            placeholder.style.display = ''; // Remove inline styles to let CSS take over
+            placeholder.style.display = ''; 
         }
     }
 
-    // Handle Selection
     if (photoInput && photoWrapper && previewImg) {
         photoInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-
             if (file) {
-                // Show Preview
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     previewImg.src = evt.target.result;
-                    previewImg.style.display = 'block'; // Force Show
+                    previewImg.style.display = 'block'; 
                     photoWrapper.classList.add('has-file');
-                    
-                    // Manually hide placeholder so it doesn't push the image down
                     if(placeholder) placeholder.style.display = 'none';
                 }
                 reader.readAsDataURL(file);
             } else {
-                // Cancelled Selection
                 resetPhotoUI();
             }
         });
     }
 
-    // Handle Form Reset (Button Click & Success)
     if (admissionForm) {
         admissionForm.addEventListener('reset', function() {
-            // Tiny timeout to let browser clear input first
             setTimeout(resetPhotoUI, 10);
         });
     }
 
     // =========================================================================
-    // 4. OTHER MODULE HANDLERS (List, Profile, Migration, etc.)
+    // 4. LIST & SEARCH LOGIC (FIXED)
     // =========================================================================
 
     window.loadStudentList = function(e) {
         if (e) e.preventDefault();
+        
         const container = document.getElementById('student-list-results');
         const form = document.getElementById('student-filter-form');
         
-        if(!container) return;
-        let params = "";
-        if(form) params = new URLSearchParams(new FormData(form)).toString();
+        if(!container || !form) return;
+
+        // --- STRICT FILTER CHECK ---
+        const formData = new FormData(form);
+        let hasFilter = false;
         
-        container.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fa fa-spinner fa-spin fa-3x" style="color:var(--primary-color);"></i><p>Loading...</p></div>';
+        // Loop through entries to check for REAL values
+        for (const [key, value] of formData.entries()) {
+            // FIX: Ignore the hidden 'module' field which always has value 'list'
+            if (key === 'module') continue; 
+            
+            if (value && value.trim() !== "") {
+                hasFilter = true;
+                break;
+            }
+        }
+
+        // If no filter is selected, STOP everything.
+        if (!hasFilter) {
+            // Clear any previous results
+            container.innerHTML = `
+                <div style="text-align:center; padding: 60px 20px; color: #777;">
+                    <i class="fa fa-search" style="font-size: 3rem; color: #ddd; margin-bottom: 15px;"></i>
+                    <p style="font-size: 1.1rem;">Please select a <strong>Level</strong>, <strong>Class</strong>, or enter a <strong>Name/ID</strong> to view students.</p>
+                </div>`;
+            
+            // Only show alert if the user explicitly clicked the Search button
+            if (e) {
+                window.showCustomAlert('warning', 'Selection Required', 'Please select at least one filter option before searching.');
+            }
+            return; 
+        }
+
+        // If validation passes, proceed
+        let params = new URLSearchParams(formData).toString();
+        
+        container.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fa fa-spinner fa-spin fa-3x" style="color:var(--primary-color);"></i><p>Searching...</p></div>';
 
         fetch(`modules/students/partial/viewstudents.php?${params}`)
         .then(r => r.text())
         .then(html => { container.innerHTML = html; })
-        .catch(err => container.innerHTML = '<p class="error">Failed to load list.</p>');
+        .catch(err => {
+            container.innerHTML = '<p class="error">Failed to connect to server.</p>';
+        });
     };
 
     window.loadSummary = function(e) {
@@ -549,13 +582,33 @@ document.addEventListener('DOMContentLoaded', () => {
         admissionForm.addEventListener('submit', window.handleAdmission);
     }
     
-    // Bind Reset Button (Manually triggers reset event)
+    // Bind Reset Button
     const resetBtn = document.getElementById('admission-reset-btn');
     if(resetBtn) {
         resetBtn.addEventListener('click', () => {
             if(admissionForm) admissionForm.reset();
         });
     }
+
+    // Handle Search Form Submission (Prevent Page Reload)
+    const filterForm = document.getElementById('student-filter-form');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            window.loadStudentList(e); // Pass event 'e' to enable the alert
+        });
+    }
+
+    // Handle Delete Button Click in List (Event Delegation)
+    document.addEventListener('click', function(e) {
+        const deleteBtn = e.target.closest('.js-delete-student');
+        if (deleteBtn) {
+            e.preventDefault();
+            const studentId = deleteBtn.dataset.id;
+            const studentName = deleteBtn.dataset.name;
+            window.showDeleteConfirmModal(studentId, studentName);
+        }
+    });
 
     // Dropdowns
     const admLevel = document.getElementById('level');
@@ -570,11 +623,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filterLevel && filterClass) {
         filterLevel.addEventListener('change', () => populateClassDropdown(filterLevel, filterClass, true));
     }
+    
+    // Reset Handler logic
     if (resetFilterBtn) {
         resetFilterBtn.addEventListener('click', () => {
             const form = document.getElementById('student-filter-form');
-            if(form) form.reset();
-            window.loadStudentList();
+            if(form) form.reset(); 
+            
+            // Manually reset dependent dropdowns
+            const filterClass = document.getElementById('filter-class');
+            if(filterClass) filterClass.innerHTML = '<option value="">All</option>';
+
+            // Clear the results area and show instructions
+            const container = document.getElementById('student-list-results');
+            if(container) {
+                container.innerHTML = `
+                <div style="text-align:center; padding: 60px 20px; color: #777;">
+                    <i class="fa fa-search" style="font-size: 3rem; color: #ddd; margin-bottom: 15px;"></i>
+                    <p style="font-size: 1.1rem;">Please select a <strong>Level</strong>, <strong>Class</strong>, or enter a <strong>Name/ID</strong> to view students.</p>
+                </div>`;
+            }
         });
     }
 
@@ -594,4 +662,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     initMigrationModule();
+
+    // =========================================================================
+    // 6. PHOTO EDIT FIXES
+    // =========================================================================
+
+    window.triggerPhotoUpload = function() {
+        const fileInput = document.getElementById('edit-photo');
+        if (fileInput) {
+            fileInput.click();
+        } else {
+            console.error("Error: File input #edit-photo not found.");
+        }
+    };
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.photo-edit-overlay')) {
+            if (!e.target.closest('[onclick]')) {
+                window.triggerPhotoUpload();
+            }
+        }
+    });
+
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'edit-photo') {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const displayPhoto = document.getElementById('display-photo');
+                    if (displayPhoto) displayPhoto.src = evt.target.result;
+                    
+                    if (typeof window.togglePageEditMode === 'function') {
+                        window.togglePageEditMode('edit');
+                    }
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        }
+    });
 });

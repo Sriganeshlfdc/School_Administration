@@ -18,7 +18,15 @@ if (!$data) die("Error: Student not found.");
 // 3. Data Formatting Helpers
 $d = fn($v) => !empty($v) ? htmlspecialchars($v) : '-';
 $fmtID = fn($id) => str_pad($id, 3, '0', STR_PAD_LEFT);
+// Construct Address from split fields
+$addr_parts = [];
+if (!empty($data['HouseNo'])) $addr_parts[] = $data['HouseNo'];
+if (!empty($data['Street'])) $addr_parts[] = $data['Street'];
+if (!empty($data['Village'])) $addr_parts[] = $data['Village'];
+if (!empty($data['Town'])) $addr_parts[] = $data['Town'];
+if (!empty($data['District'])) $addr_parts[] = $data['District'];
 
+$display_address = !empty($addr_parts) ? implode(', ', $addr_parts) : '-';
 // 4. Image Path Resolution
 $photo_db = $data['PhotoPath']; 
 $photo_src = '../../assets/images/default_profile.png';
@@ -108,7 +116,7 @@ $print_time = date('h:i:s A');
                     <td class="label">Residence</td><td class="value"><?php echo $d($data['Residence']); ?></td>
                 </tr>
                 <tr>
-                    <td class="label">Address</td><td class="value" colspan="3"><?php echo $d($data['Address']); ?></td>
+                    <td class="label">Address</td><td class="value" colspan="3"><?php echo htmlspecialchars($display_address); ?></td>
                 </tr>
             </table>
         </div>

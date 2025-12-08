@@ -1,5 +1,5 @@
 <?php
-// webpages/includes/profile_edit_form.php
+// modules/students/partial/profile_edit_form.php
 if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
 ?>
 <form id="edit-mode-form" class="profile-grid-system" action="edit_student.php" method="POST" enctype="multipart/form-data" style="display: none;">
@@ -17,7 +17,12 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
                     <option value="Female" <?php echo ($student_data['Gender'] == 'Female') ? 'selected' : ''; ?>>Female</option>
                 </select>
             </div>
-            <div class="grid-item"><label>Address</label> <input type="text" name="Address" id="i-address" value="<?php echo $val($student_data['Address']); ?>"></div>
+            
+            <div class="grid-item"><label>House No/Zone</label> <input type="text" name="HouseNo" value="<?php echo $val($student_data['HouseNo']); ?>"></div>
+            <div class="grid-item"><label>Street</label> <input type="text" name="Street" value="<?php echo $val($student_data['Street']); ?>"></div>
+            <div class="grid-item"><label>Village</label> <input type="text" name="Village" value="<?php echo $val($student_data['Village']); ?>"></div>
+            <div class="grid-item"><label>Town</label> <input type="text" name="Town" value="<?php echo $val($student_data['Town']); ?>"></div>
+            <div class="grid-item"><label>District</label> <input type="text" name="District" value="<?php echo $val($student_data['District']); ?>"></div>
             
             <input type="hidden" name="AdmissionYear" value="<?php echo $val($student_data['AdmissionYear']); ?>">
             <input type="file" id="edit-photo" name="photo" accept="image/*" style="display: none;">
@@ -27,9 +32,9 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
     <fieldset>
         <legend>2. Father's Details</legend>
         <div class="grid-row">
-            <div class="grid-item"><label>Father Name</label> <input type="text" name="father_name" value="<?php echo $val($student_data['father_name']); ?>"></div>
+            <div class="grid-item"><label>Name</label> <input type="text" name="father_name" value="<?php echo $val($student_data['father_name']); ?>"></div>
             <div class="grid-item"><label>Contact</label> <input type="text" name="father_contact" value="<?php echo $val($student_data['father_contact']); ?>"></div>
-            <div class="grid-item"><label>Age</label> <input type="number" name="father_age" value="<?php echo $val($student_data['father_age']); ?>"></div>
+            <div class="grid-item"><label>Email</label> <input type="email" name="father_email" value="<?php echo $val($student_data['father_email']); ?>"></div>
             <div class="grid-item"><label>Occupation</label> <input type="text" name="father_occupation" value="<?php echo $val($student_data['father_occupation']); ?>"></div>
             <div class="grid-item"><label>Education</label> <input type="text" name="father_education" value="<?php echo $val($student_data['father_education']); ?>"></div>
         </div>
@@ -38,9 +43,9 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
     <fieldset>
         <legend>3. Mother's Details</legend>
         <div class="grid-row">
-             <div class="grid-item"><label>Mother Name</label> <input type="text" name="mother_name" value="<?php echo $val($student_data['mother_name']); ?>"></div>
+             <div class="grid-item"><label>Name</label> <input type="text" name="mother_name" value="<?php echo $val($student_data['mother_name']); ?>"></div>
             <div class="grid-item"><label>Contact</label> <input type="text" name="mother_contact" value="<?php echo $val($student_data['mother_contact']); ?>"></div>
-            <div class="grid-item"><label>Age</label> <input type="number" name="mother_age" value="<?php echo $val($student_data['mother_age']); ?>"></div>
+            <div class="grid-item"><label>Email</label> <input type="email" name="mother_email" value="<?php echo $val($student_data['mother_email']); ?>"></div>
             <div class="grid-item"><label>Occupation</label> <input type="text" name="mother_occupation" value="<?php echo $val($student_data['mother_occupation']); ?>"></div>
             <div class="grid-item"><label>Education</label> <input type="text" name="mother_education" value="<?php echo $val($student_data['mother_education']); ?>"></div>
         </div>
@@ -49,8 +54,9 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
     <fieldset>
         <legend>4. Guardian Details</legend>
         <div class="grid-row">
-            <div class="grid-item"><label>Guardian Name</label> <input type="text" name="guardian_name" value="<?php echo $val($student_data['guardian_name']); ?>"></div>
+            <div class="grid-item"><label>Name</label> <input type="text" name="guardian_name" value="<?php echo $val($student_data['guardian_name']); ?>"></div>
             <div class="grid-item"><label>Contact</label> <input type="text" name="guardian_contact" value="<?php echo $val($student_data['guardian_contact']); ?>"></div>
+            <div class="grid-item"><label>Email</label> <input type="email" name="guardian_email" value="<?php echo $val($student_data['guardian_email']); ?>"></div>
             <div class="grid-item"><label>Relation</label> 
                 <select name="guardian_relation">
                     <option value="">Select</option>
@@ -74,7 +80,6 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
                     $curr = date('Y');
                     $curr_ay = format_academic_year($curr);
                     $sel_year = $student_data['AcademicYear'] ? $student_data['AcademicYear'] : $curr_ay;
-                    // Provide a range
                     for($y=$curr+1; $y>=$curr-5; $y--) {
                         $ay = format_academic_year($y);
                         $sel = ($ay == $sel_year) ? 'selected' : '';
@@ -90,16 +95,14 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
                     <option value="secondary" <?php echo ($student_data['Level'] == 'secondary') ? 'selected' : ''; ?>>Secondary</option>
                 </select>
             </div>
-            
             <div class="grid-item"><label>Class</label> 
-                <select name="Class" id="i-class" data-current="<?php echo $val($student_data['Class']); ?>">
+                <select name="Class" id="i-class">
                     <option value="<?php echo $val($student_data['Class']); ?>" selected><?php echo $val($student_data['Class']); ?></option>
                 </select>
             </div>
-            
             <div class="grid-item"><label>Stream</label> 
                 <select name="Stream" id="i-stream">
-                    <option value="">Select Stream</option>
+                    <option value="">Select</option>
                     <?php 
                     $central_streams = getStreamOptions();
                     foreach($central_streams as $s_opt) {
@@ -109,7 +112,6 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
                     ?>
                 </select>
             </div>
-            
             <div class="grid-item"><label>Term</label>
                 <select name="Term" id="i-term">
                     <option value="Term 1" <?php echo ($student_data['Term'] == 'Term 1') ? 'selected' : ''; ?>>Term 1</option>
@@ -130,11 +132,11 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
     <fieldset>
         <legend>6. Academic History</legend>
         <div class="grid-row">
-            <div class="grid-item"><label>Former School</label> <input type="text" name="FormerSchool" id="i-former-school" value="<?php echo $val($student_data['FormerSchool']); ?>"></div>
-            <div class="grid-item"><label>PLE Index No</label> <input type="text" name="PLEIndexNumber" id="i-ple-index" value="<?php echo $val($student_data['PLEIndexNumber']); ?>"></div>
-            <div class="grid-item"><label>PLE Aggregate</label> <input type="number" name="PLEAggregate" id="i-ple-agg" value="<?php echo $val($student_data['PLEAggregate']); ?>"></div>
-            <div class="grid-item"><label>UCE Index No</label> <input type="text" name="UCEIndexNumber" id="i-uce-index" value="<?php echo $val($student_data['UCEIndexNumber']); ?>"></div>
-            <div class="grid-item"><label>UCE Results</label> <input type="text" name="UCEResult" id="i-uce-result" value="<?php echo $val($student_data['UCEResult']); ?>"></div>
+            <div class="grid-item"><label>Former School</label> <input type="text" name="FormerSchool" value="<?php echo $val($student_data['FormerSchool']); ?>"></div>
+            <div class="grid-item"><label>PLE Index No</label> <input type="text" name="PLEIndexNumber" value="<?php echo $val($student_data['PLEIndexNumber']); ?>"></div>
+            <div class="grid-item"><label>PLE Aggregate</label> <input type="number" name="PLEAggregate" value="<?php echo $val($student_data['PLEAggregate']); ?>"></div>
+            <div class="grid-item"><label>UCE Index No</label> <input type="text" name="UCEIndexNumber" value="<?php echo $val($student_data['UCEIndexNumber']); ?>"></div>
+            <div class="grid-item"><label>UCE Results</label> <input type="text" name="UCEResult" value="<?php echo $val($student_data['UCEResult']); ?>"></div>
         </div>
     </fieldset>
 </form>
