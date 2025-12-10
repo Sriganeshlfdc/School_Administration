@@ -1243,6 +1243,8 @@ fieldset.nested-fieldset legend {
     display: block;
 }
 
+/* --- UPDATED PHOTO EDIT OVERLAY STYLES --- */
+
 .photo-edit-overlay {
     position: absolute;
     bottom: 0;
@@ -1251,18 +1253,33 @@ fieldset.nested-fieldset legend {
     height: 30%;
     background: rgba(0, 0, 0, 0.6);
     color: white;
-    display: flex;
     justify-content: center;
     align-items: center;
     font-size: 0.8rem;
     font-weight: 600;
     gap: 5px;
-    opacity: 0;
     transition: opacity 0.3s ease;
+    
+    /* FIX: Hidden by default so it doesn't show in View Mode */
+    display: none; 
+    opacity: 0;
 }
 
-.profile-image-container:hover .photo-edit-overlay {
+/* Only enable display when in Edit Mode */
+.profile-image-container.editable-mode .photo-edit-overlay {
+    display: flex;
+    cursor: pointer;
+}
+
+/* Show on Hover ONLY if in Edit Mode */
+.profile-image-container.editable-mode:hover .photo-edit-overlay {
     opacity: 1;
+}
+
+/* Optional: Add a subtle border color change in edit mode to indicate it's active */
+.profile-image-container.editable-mode {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(30, 136, 229, 0.2);
 }
 
 .frame-left h3 {

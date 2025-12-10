@@ -1,35 +1,24 @@
 <?php
 // modules/students/partial/profile_edit_form.php
 if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
-// Calculate initial photo source for preview
 $currentPhoto = !empty($student_data['PhotoPath']) ? $student_data['PhotoPath'] : 'static/images/default_profile.png';
 ?>
-<form id="edit-mode-form" class="profile-grid-system" action="api/students/edit_student.php" method="POST" enctype="multipart/form-data" style="display: none;">
+<form id="edit-mode-form" class="profile-grid-system" method="POST" enctype="multipart/form-data" style="display: none;">
     <input type="hidden" name="StudentID" value="<?php echo $val($student_data['StudentID']); ?>">
     
-    <fieldset>
-        <legend>Profile Photo</legend>
-        <div class="edit-photo-section">
-            <img id="form-photo-preview" src="<?php echo $currentPhoto; ?>" alt="Preview" class="edit-photo-preview">
-            <div class="edit-photo-controls">
-                <p class="text-muted" style="font-size:0.9em;">Click below to change photo. (Preview Mode)</p>
-                <label for="edit-photo-input" class="btn-primary" style="width:auto; cursor:pointer;">
-                    <i class="fa fa-camera"></i> Select New Photo
-                </label>
-                <input type="file" id="edit-photo-input" name="photo" accept="image/*" style="display: none;">
-                <input type="hidden" id="original-photo-src" value="<?php echo $currentPhoto; ?>">
-            </div>
-        </div>
-    </fieldset>
+    <input type="hidden" name="temp_photo_filename" id="temp-photo-filename" value="">
+    <input type="file" id="edit-photo-input" name="photo" accept="image/*" style="display: none;">
+    <input type="hidden" id="original-photo-src" value="<?php echo $currentPhoto; ?>">
+    <img id="form-photo-preview" src="<?php echo $currentPhoto; ?>" style="display:none;" alt="Hidden Preview">
 
     <fieldset>
         <legend>1. Personal Information</legend>
         <div class="grid-row">
-            <div class="grid-item"><label>Name</label> <input type="text" name="Name" id="i-name" value="<?php echo $val($student_data['Name']); ?>" required></div>
-            <div class="grid-item"><label>Surname</label> <input type="text" name="Surname" id="i-surname" value="<?php echo $val($student_data['Surname']); ?>" required></div>
-            <div class="grid-item"><label>Date of Birth</label> <input type="date" name="DateOfBirth" id="i-dob" value="<?php echo $val($student_data['DateOfBirth']); ?>"></div>
+            <div class="grid-item"><label>Name</label> <input type="text" name="Name" value="<?php echo $val($student_data['Name']); ?>" required></div>
+            <div class="grid-item"><label>Surname</label> <input type="text" name="Surname" value="<?php echo $val($student_data['Surname']); ?>" required></div>
+            <div class="grid-item"><label>Date of Birth</label> <input type="date" name="DateOfBirth" value="<?php echo $val($student_data['DateOfBirth']); ?>"></div>
             <div class="grid-item"><label>Gender</label> 
-                <select name="Gender" id="i-gender">
+                <select name="Gender">
                     <option value="Male" <?php echo ($student_data['Gender'] == 'Male') ? 'selected' : ''; ?>>Male</option>
                     <option value="Female" <?php echo ($student_data['Gender'] == 'Female') ? 'selected' : ''; ?>>Female</option>
                 </select>
@@ -77,13 +66,16 @@ $currentPhoto = !empty($student_data['PhotoPath']) ? $student_data['PhotoPath'] 
             <div class="grid-item"><label>Relation</label> 
                 <select name="guardian_relation">
                     <option value="">Select</option>
-                    <?php $rels=['Brother','Sister','Uncle','Aunt','Grandparent','Other']; foreach($rels as $r) {
+                    <?php foreach(['Brother','Sister','Uncle','Aunt','Grandparent','Other'] as $r) {
                         $sel = ($student_data['guardian_relation'] == $r) ? 'selected' : '';
                         echo "<option value='$r' $sel>$r</option>";
                     } ?>
                 </select>
             </div>
             <div class="grid-item"><label>Address</label> <input type="text" name="guardian_address" value="<?php echo $val($student_data['guardian_address']); ?>"></div>
+            <div class="grid-item"><label>Age</label> <input type="number" name="guardian_age" value="<?php echo $val($student_data['guardian_age'] ?? ''); ?>"></div>
+            <div class="grid-item"><label>Occupation</label> <input type="text" name="guardian_occupation" value="<?php echo $val($student_data['guardian_occupation'] ?? ''); ?>"></div>
+            <div class="grid-item"><label>Education</label> <input type="text" name="guardian_education" value="<?php echo $val($student_data['guardian_education'] ?? ''); ?>"></div>
             <div class="grid-item full-width"><label>Notes</label> <textarea name="GuardianNotes"><?php echo $val($student_data['GuardianNotes']); ?></textarea></div>
         </div>
     </fieldset>
@@ -92,7 +84,7 @@ $currentPhoto = !empty($student_data['PhotoPath']) ? $student_data['PhotoPath'] 
         <legend>5. Enrollment Details</legend>
         <div class="grid-row">
             <div class="grid-item"><label>Academic Year</label>
-                <select name="AcademicYear" id="i-regyear">
+                <select name="AcademicYear">
                     <?php 
                     $curr = date('Y');
                     $curr_ay = format_academic_year($curr);
@@ -107,19 +99,21 @@ $currentPhoto = !empty($student_data['PhotoPath']) ? $student_data['PhotoPath'] 
             </div>
             <div class="grid-item"><label>Level</label>
                 <select name="Level" id="i-level">
-                    <option value="pre-primary" <?php echo ($student_data['Level'] == 'pre-primary') ? 'selected' : ''; ?>>Pre-Primary</option>
-                    <option value="primary" <?php echo ($student_data['Level'] == 'primary') ? 'selected' : ''; ?>>Primary</option>
-                    <option value="secondary" <?php echo ($student_data['Level'] == 'secondary') ? 'selected' : ''; ?>>Secondary</option>
+                    <?php $lvl = strtolower($student_data['Level'] ?? ''); ?>
+                    <option value="pre-primary" <?php echo ($lvl == 'pre-primary') ? 'selected' : ''; ?>>Pre-Primary</option>
+                    <option value="primary" <?php echo ($lvl == 'primary') ? 'selected' : ''; ?>>Primary</option>
+                    <option value="secondary" <?php echo ($lvl == 'secondary') ? 'selected' : ''; ?>>Secondary</option>
                 </select>
             </div>
+            
             <div class="grid-item"><label>Class</label> 
-                <select name="Class" id="i-class">
+                <select name="Class" id="i-class" data-initial-value="<?php echo $val($student_data['Class']); ?>">
                     <option value="<?php echo $val($student_data['Class']); ?>" selected><?php echo $val($student_data['Class']); ?></option>
                 </select>
             </div>
+            
             <div class="grid-item"><label>Stream</label> 
                 <select name="Stream" id="i-stream">
-                    <option value="">Select</option>
                     <?php 
                     $central_streams = getStreamOptions();
                     foreach($central_streams as $s_opt) {

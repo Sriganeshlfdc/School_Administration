@@ -6,25 +6,21 @@ let activeModule = 'dashboard';
 let openMenu = null;
 let isSettingsOpen = false;
 
+// DOM Elements
 const body = document.body;
 const menuToggle = document.getElementById('menu-toggle');
 const menuIcon = menuToggle ? menuToggle.querySelector('i') : null;
 const sidebar = document.getElementById('sidebar');
 const content = document.getElementById('content'); 
-const moduleDisplay = document.getElementById('moduleDisplay'); 
-
 const settingsBtn = document.getElementById('settings-btn');
 const settingsPanel = document.getElementById('settings-panel');
 const settingsCloseBtn = document.getElementById('settings-close-btn');
-
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const fullscreenBtn = document.getElementById('fullscreen-btn');
 const fullscreenIcon = fullscreenBtn ? fullscreenBtn.querySelector('i') : null;
-
 const navLinks = document.querySelectorAll('.sidebar .main-item, .sidebar .sub-menu a');
 const mobileOverlay = document.getElementById('overlay');
 
-// Constant for storage key for fullscreen persistence
 const FULLSCREEN_STORAGE_KEY = 'montfort_is_fullscreen';
 
 // =========================================================================
@@ -35,59 +31,76 @@ function handleNavigate(targetModule) {
     if (!targetModule) return;
     activeModule = targetModule;
 
-    // 1. Hide all modules
+    // A. Force Hide Dashboard Module
+    const dashboard = document.getElementById('dashboard-module');
+    if (dashboard) dashboard.style.display = 'none';
+
+    // B. Hide ALL other modules
     document.querySelectorAll('.module').forEach(module => {
         module.style.display = 'none';
     });
 
-    // 2. Show the target module container
-    // Matches IDs like "admission-module", "list-module", "dashboard-module"
+    // C. Show Target Module
     const targetEl = document.getElementById(`${targetModule}-module`);
+    
     if (targetEl) {
         targetEl.style.display = 'block';
         
-        // 3. Lazy Load Data triggers (Interacts with functions in student.js)
-        // Check if the function exists on window before calling
+        // --- Data Loading Triggers ---
+        
+        // 1. Student List (Load if empty)
         if (targetModule === 'list' && typeof window.loadStudentList === 'function') {
             const listContainer = document.getElementById('student-list-results');
-            // Load if empty or to ensure fresh data
             if (listContainer && !listContainer.hasChildNodes()) {
                 window.loadStudentList();
             }
         }
+        
+        // 2. Summary (Always reload for fresh data)
         if (targetModule === 'summary' && typeof window.loadSummary === 'function') {
-            const summaryContainer = document.getElementById('summary-results');
-            if (summaryContainer && !summaryContainer.hasChildNodes()) {
-                window.loadSummary();
-            }
+            window.loadSummary();
         }
+
+        // 3. Profile (Handle Refresh)
+        if (targetModule === 'profile') {
+             const savedId = localStorage.getItem('currentStudentId');
+             if (savedId) {
+                 if(typeof window.loadProfileViaAjax === 'function') {
+                    window.loadProfileViaAjax(savedId);
+                 } else {
+                    // Retry if functions aren't ready yet
+                    setTimeout(() => {
+                        if(typeof window.loadProfileViaAjax === 'function') window.loadProfileViaAjax(savedId);
+                    }, 100);
+                 }
+             } else {
+                 handleNavigate('list');
+                 return;
+             }
+        }
+
     } else {
-        console.warn(`Module container #${targetModule}-module not found.`);
+        // Fallback: If target not found, show dashboard
+        if(dashboard) dashboard.style.display = 'block';
     }
 
-    // 4. Update Browser History (without reload)
+    // D. Update URL Hash
     if(history.pushState) {
         history.pushState(null, null, '#' + targetModule);
     } else {
         window.location.hash = targetModule;
     }
 
-    // 5. Update UI Active States in Sidebar
+    // E. Update UI Active States
     navLinks.forEach(link => {
         link.classList.remove('active');
-
-        // Check for direct data-menu link or href match
-        // Also handle the case where the link might be inside the li
         if (link.dataset.menu === targetModule || link.getAttribute('href') === '#' + targetModule) {
             link.classList.add('active');
-            
-            // Handle Accordion State (Expand parent submenu)
             const parentMenuListItem = link.closest('li');
             if (parentMenuListItem) {
                 const subMenu = parentMenuListItem.closest('.sub-menu');
                 if (subMenu) {
                     subMenu.classList.add('show');
-                    // Highlight the parent trigger
                     const parentTrigger = subMenu.previousElementSibling;
                     if (parentTrigger) parentTrigger.classList.add('active');
                 }
@@ -95,7 +108,7 @@ function handleNavigate(targetModule) {
         }
     });
 
-    // Mobile specific: Close sidebar on navigation
+    // F. Mobile: Close sidebar
     if (window.innerWidth <= 768 && isSidebarOpen) { 
         toggleSidebar();
     }
@@ -113,10 +126,7 @@ function toggleSidebar() {
         sidebar.classList.toggle('open', isSidebarOpen);
         if(mobileOverlay) mobileOverlay.classList.toggle('active', isSidebarOpen);
         sidebar.classList.remove('collapsed');
-        
-        if(menuIcon) {
-            menuIcon.className = isSidebarOpen ? 'fa fa-times' : 'fa fa-bars'; 
-        }
+        if(menuIcon) menuIcon.className = isSidebarOpen ? 'fa fa-times' : 'fa fa-bars'; 
     }
     else {
         sidebar.classList.toggle('collapsed', !isSidebarOpen);
@@ -139,17 +149,16 @@ function toggleTheme() {
 
 function toggleFullscreen() {
     if (!fullscreenIcon) return; 
-
     if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().then(() => {
             localStorage.setItem(FULLSCREEN_STORAGE_KEY, 'true');
-        }).catch(err => console.error("Failed to enter fullscreen:", err));
+        }).catch(err => console.error("Fullscreen error:", err));
         fullscreenIcon.className = 'fa-solid fa-compress';
     } else {
         if (document.exitFullscreen) {
             document.exitFullscreen().then(() => {
                 localStorage.removeItem(FULLSCREEN_STORAGE_KEY);
-            }).catch(err => console.error("Failed to exit fullscreen:", err));
+            }).catch(err => console.error("Fullscreen exit error:", err));
             fullscreenIcon.className = 'fa-solid fa-expand';
         }
     }
@@ -160,8 +169,7 @@ function restoreFullscreen() {
         setTimeout(() => {
              document.documentElement.requestFullscreen().then(() => {
                 if (fullscreenIcon) fullscreenIcon.className = 'fa-solid fa-compress';
-            }).catch(err => {
-                console.warn("Fullscreen restore failed (user interaction required). Clearing state.", err);
+            }).catch(() => {
                 localStorage.removeItem(FULLSCREEN_STORAGE_KEY);
                 if (fullscreenIcon) fullscreenIcon.className = 'fa-solid fa-expand';
             });
@@ -170,28 +178,15 @@ function restoreFullscreen() {
 }
 
 function handleAccordion(e){
-    // 1. Prevent default scroll jump behavior
     e.preventDefault();
-
-    // Determine if the clicked element is a link or a menu toggle
     const item = e.currentTarget;
     const subMenu = item.nextElementSibling;
-    
     const isDesktopCollapsed = (window.innerWidth > 768 && !isSidebarOpen);
     
-    // CASE A: It is a Sub-Menu Toggle (has a sibling .sub-menu)
     if (subMenu && subMenu.classList.contains('sub-menu')) {
+        if (isDesktopCollapsed) toggleSidebar(); 
+        if (openMenu && openMenu !== subMenu) openMenu.classList.remove('show'); 
         
-        if (isDesktopCollapsed) {
-            toggleSidebar(); // Auto-expand sidebar if collapsed
-        }
-
-        // Close other open menus
-        if (openMenu && openMenu !== subMenu) {
-            openMenu.classList.remove('show'); 
-        }
-        
-        // Toggle current menu
         if(subMenu.classList.contains('show')) {
             subMenu.classList.remove('show');
             openMenu = null;
@@ -199,21 +194,11 @@ function handleAccordion(e){
             subMenu.classList.add('show');
             openMenu = subMenu;
         }
-    } 
-    // CASE B: It is a direct link (Dashboard or Sub-menu Item)
-    else {
-        // Priority 1: Check for data-menu attribute (used by main items like Dashboard)
-        if (item.dataset.menu) {
-            handleNavigate(item.dataset.menu);
-        } 
-        // Priority 2: Check for href attribute (used by sub-menu links like #admission)
+    } else {
+        if (item.dataset.menu) handleNavigate(item.dataset.menu);
         else if (item.hasAttribute('href')) {
             const href = item.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                // Remove the '#' and navigate
-                const target = href.substring(1);
-                handleNavigate(target);
-            }
+            if (href && href.startsWith('#')) handleNavigate(href.substring(1));
         }
     }
 }
@@ -223,7 +208,6 @@ function handleAccordion(e){
 // =========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Event Listeners
     if (menuToggle) menuToggle.addEventListener('click', toggleSidebar);
     if (mobileOverlay) mobileOverlay.addEventListener('click', toggleSidebar);
     if (settingsBtn) settingsBtn.addEventListener('click', toggleSettings);
@@ -231,13 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
     if (fullscreenBtn) fullscreenBtn.addEventListener('click', toggleFullscreen);
 
-    // Sidebar Links & Accordion
-    navLinks.forEach(link => {
-        // Attach listener to both <a> (if wrapper) or .main-item
-        link.addEventListener('click', handleAccordion);
-    });
+    navLinks.forEach(link => link.addEventListener('click', handleAccordion));
     
-    // Initialize Sidebar State
     if(sidebar) {
         if(window.innerWidth <= 768) { 
             isSidebarOpen = false;
@@ -252,14 +231,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Attempt to restore fullscreen preference
     restoreFullscreen();
 
-    // Handle Initial Routing based on URL Hash
+    // Fix: Immediately check hash and navigate
     const hash = window.location.hash.substring(1);
+    
+    // Explicitly hide dashboard if we are going somewhere else on load
+    if (hash && hash !== 'dashboard') {
+        const dash = document.getElementById('dashboard-module');
+        if(dash) dash.style.display = 'none';
+    }
+
     handleNavigate(hash || 'dashboard');
 
-    // Listen for browser back/forward buttons
     window.addEventListener('hashchange', () => {
         const newHash = window.location.hash.substring(1);
         handleNavigate(newHash);

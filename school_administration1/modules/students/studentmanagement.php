@@ -112,6 +112,7 @@ $selected_summary_term = get_summary_filter_value('summary_term', 'Term 1');
                             </div>
                             
                             <div class="field third-width"><label>Occupation</label><input type="text" name="guardian_occupation"></div>
+                            <div class="field half-width"><label>Education</label><input type="text" name="guardian_education"></div>
                             <div class="field full-width"><label>Address</label><input type="text" name="guardian_address" placeholder="If different from student"></div>
                         </div>
                     </fieldset>
