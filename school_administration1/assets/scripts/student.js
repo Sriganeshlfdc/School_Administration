@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterFormOnLoad = document.getElementById('student-filter-form');
     if (filterFormOnLoad) {
         filterFormOnLoad.reset();
-        filterFormOnLoad.setAttribute("autocomplete", "off"); // Prevent browser autofill
+        filterFormOnLoad.setAttribute("autocomplete", "off");
     }
 
     // =========================================================================
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================================
-    // 4. LIST & SEARCH LOGIC (FIXED)
+    // 4. LIST & SEARCH LOGIC
     // =========================================================================
 
     window.loadStudentList = function(e) {
@@ -170,38 +170,30 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if(!container || !form) return;
 
-        // --- STRICT FILTER CHECK ---
         const formData = new FormData(form);
         let hasFilter = false;
         
-        // Loop through entries to check for REAL values
         for (const [key, value] of formData.entries()) {
-            // FIX: Ignore the hidden 'module' field which always has value 'list'
             if (key === 'module') continue; 
-            
             if (value && value.trim() !== "") {
                 hasFilter = true;
                 break;
             }
         }
 
-        // If no filter is selected, STOP everything.
         if (!hasFilter) {
-            // Clear any previous results
             container.innerHTML = `
                 <div style="text-align:center; padding: 60px 20px; color: #777;">
                     <i class="fa fa-search" style="font-size: 3rem; color: #ddd; margin-bottom: 15px;"></i>
                     <p style="font-size: 1.1rem;">Please select a <strong>Level</strong>, <strong>Class</strong>, or enter a <strong>Name/ID</strong> to view students.</p>
                 </div>`;
             
-            // Only show alert if the user explicitly clicked the Search button
             if (e) {
                 window.showCustomAlert('warning', 'Selection Required', 'Please select at least one filter option before searching.');
             }
             return; 
         }
 
-        // If validation passes, proceed
         let params = new URLSearchParams(formData).toString();
         
         container.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fa fa-spinner fa-spin fa-3x" style="color:var(--primary-color);"></i><p>Searching...</p></div>';
@@ -214,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // --- SUMMARY MODULE LOGIC ---
     window.loadSummary = function(e) {
         if (e) e.preventDefault();
         const container = document.getElementById('summary-results');
@@ -234,37 +227,75 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => container.innerHTML = '<p class="error">Failed to load summary.</p>');
     };
 
-    function initSummaryTabs(context) {
-        const tabs = context.querySelectorAll('.tab-button');
-        if (!tabs.length) return;
-        tabs.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const group = this.closest('.summary-tabs') || this.closest('.sub-tab-navigation');
-                const parentContainer = this.closest('.summary-container') || this.closest('.tab-content');
-                if(group) group.querySelectorAll('.tab-button, .sub-tab-button').forEach(t => t.classList.remove('active'));
-                if(parentContainer) {
-                    parentContainer.querySelectorAll('.tab-content, .sub-tab-content').forEach(c => {
-                        if(c.parentElement === parentContainer || c.parentElement.parentElement === parentContainer) {
-                            c.style.display = 'none';
-                            c.classList.remove('active');
+    // --- FIXED: TAB LOGIC FOR GENDER & RESIDENCE ---
+    window.initSummaryTabs = function(context) {
+        // Handle Main Tabs (Class List, Gender, Residence)
+        const mainTabs = context.querySelectorAll('.summary-tabs .tab-button');
+        
+        if (mainTabs.length) {
+            mainTabs.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 1. Find the wrapper container (.tabbed-details-container)
+                    const container = this.closest('.tabbed-details-container');
+                    if (!container) return;
+
+                    // 2. Remove active class from buttons
+                    const tabGroup = this.closest('.summary-tabs');
+                    tabGroup.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+
+                    // 3. Hide ALL direct child tab-contents inside this container
+                    const allContents = container.querySelectorAll('.tab-content');
+                    allContents.forEach(content => {
+                        // Ensure we only hide contents belonging to this specific container
+                        if (content.parentElement === container) {
+                            content.style.display = 'none';
+                            content.classList.remove('active');
                         }
                     });
-                }
-                this.classList.add('active');
-                const targetId = this.dataset.tab || this.dataset.subTab;
-                const targetContent = document.getElementById(targetId);
-                if(targetContent) {
-                    targetContent.style.display = 'block';
-                    targetContent.classList.add('active');
-                    const subNav = targetContent.querySelector('.sub-tab-navigation');
-                    if(subNav && !targetContent.querySelector('.sub-tab-content.active')) {
-                        const firstSub = subNav.querySelector('.sub-tab-button');
-                        if(firstSub) firstSub.click();
+
+                    // 4. Activate current button and show target content
+                    this.classList.add('active');
+                    const targetId = this.dataset.tab;
+                    const targetContent = document.getElementById(targetId);
+                    
+                    if (targetContent) {
+                        targetContent.style.display = 'block';
+                        targetContent.classList.add('active');
                     }
-                }
+                });
             });
-        });
-    }
+        }
+
+        // Handle Sub Tabs (if any exist)
+        const subTabs = context.querySelectorAll('.sub-tab-navigation .sub-tab-button');
+        if (subTabs.length) {
+            subTabs.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const container = this.closest('.tab-content'); 
+                    const group = this.closest('.sub-tab-navigation');
+                    
+                    if(group) group.querySelectorAll('.sub-tab-button').forEach(b => b.classList.remove('active'));
+                    if(container) {
+                        container.querySelectorAll('.sub-tab-content').forEach(c => {
+                            c.style.display = 'none'; 
+                            c.classList.remove('active');
+                        });
+                    }
+
+                    this.classList.add('active');
+                    const targetId = this.dataset.subTab;
+                    const targetContent = document.getElementById(targetId);
+                    if (targetContent) {
+                        targetContent.style.display = 'block';
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+        }
+    };
 
     // --- Profile & Edit ---
     window.loadProfileViaAjax = function(studentId) {
@@ -590,13 +621,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle Search Form Submission (Prevent Page Reload)
+    // Handle List Search Form Submission (Prevent Page Reload)
     const filterForm = document.getElementById('student-filter-form');
     if (filterForm) {
         filterForm.addEventListener('submit', function(e) {
             e.preventDefault(); 
-            window.loadStudentList(e); // Pass event 'e' to enable the alert
+            window.loadStudentList(e); 
         });
+    }
+
+    // Bind Summary Form Submission
+    const summaryForm = document.getElementById('summary-filter-form');
+    if (summaryForm) {
+        summaryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            window.loadSummary(e);
+        });
+    }
+
+    // Initialize tabs if summary is already present (e.g. from server render or back navigation)
+    const summaryContainer = document.getElementById('summary-results');
+    if (summaryContainer && summaryContainer.hasChildNodes()) {
+        window.initSummaryTabs(summaryContainer);
     }
 
     // Handle Delete Button Click in List (Event Delegation)

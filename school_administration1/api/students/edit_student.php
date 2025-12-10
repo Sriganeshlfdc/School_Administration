@@ -144,7 +144,9 @@ try {
         'Street' => 'Street',
         'Village' => 'Village',
         'Town' => 'Town',
-        'District' => 'District'
+        'District' => 'District',
+        'State' => 'State',
+        'Country' => 'Country'
     ];
     
     $parents_map = [

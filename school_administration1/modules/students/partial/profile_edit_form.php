@@ -1,10 +1,27 @@
 <?php
 // modules/students/partial/profile_edit_form.php
 if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
+// Calculate initial photo source for preview
+$currentPhoto = !empty($student_data['PhotoPath']) ? $student_data['PhotoPath'] : 'static/images/default_profile.png';
 ?>
-<form id="edit-mode-form" class="profile-grid-system" action="edit_student.php" method="POST" enctype="multipart/form-data" style="display: none;">
+<form id="edit-mode-form" class="profile-grid-system" action="api/students/edit_student.php" method="POST" enctype="multipart/form-data" style="display: none;">
     <input type="hidden" name="StudentID" value="<?php echo $val($student_data['StudentID']); ?>">
     
+    <fieldset>
+        <legend>Profile Photo</legend>
+        <div class="edit-photo-section">
+            <img id="form-photo-preview" src="<?php echo $currentPhoto; ?>" alt="Preview" class="edit-photo-preview">
+            <div class="edit-photo-controls">
+                <p class="text-muted" style="font-size:0.9em;">Click below to change photo. (Preview Mode)</p>
+                <label for="edit-photo-input" class="btn-primary" style="width:auto; cursor:pointer;">
+                    <i class="fa fa-camera"></i> Select New Photo
+                </label>
+                <input type="file" id="edit-photo-input" name="photo" accept="image/*" style="display: none;">
+                <input type="hidden" id="original-photo-src" value="<?php echo $currentPhoto; ?>">
+            </div>
+        </div>
+    </fieldset>
+
     <fieldset>
         <legend>1. Personal Information</legend>
         <div class="grid-row">
@@ -23,9 +40,9 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
             <div class="grid-item"><label>Village</label> <input type="text" name="Village" value="<?php echo $val($student_data['Village']); ?>"></div>
             <div class="grid-item"><label>Town</label> <input type="text" name="Town" value="<?php echo $val($student_data['Town']); ?>"></div>
             <div class="grid-item"><label>District</label> <input type="text" name="District" value="<?php echo $val($student_data['District']); ?>"></div>
+            <div class="grid-item"><label>State</label> <input type="text" name="State" value="<?php echo $val($student_data['State']); ?>"></div>
             
             <input type="hidden" name="AdmissionYear" value="<?php echo $val($student_data['AdmissionYear']); ?>">
-            <input type="file" id="edit-photo" name="photo" accept="image/*" style="display: none;">
         </div>
     </fieldset>
 

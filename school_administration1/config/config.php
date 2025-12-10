@@ -6,12 +6,12 @@ define('CONFIG_LOADED', true);
 // --- Database Configuration ---
 $DB_HOST = '127.0.0.1';
 $DB_USER = 'root'; 
-$DB_PASS = ''; 
+$DB_PASS = '$riG@nesh27'; 
 $DB_NAME = 'school_administration';
 
 // --- File Handling ---
-$UPLOAD_FOLDER_REL = 'assets/uploads/'; 
-$UPLOAD_DIR_BASE = __DIR__ . '/../assets/uploads/';
+$UPLOAD_FOLDER_REL = 'assets/uploads/students/'; 
+$UPLOAD_DIR_BASE = __DIR__ . '/../assets/uploads/students/';
 $MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 define('MAX_STUDENTS_PER_STREAM', 50); 
 define('MAX_STUDENTS_PER_CLASS', 250); 

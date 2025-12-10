@@ -25,6 +25,7 @@ if (!empty($data['Street'])) $addr_parts[] = $data['Street'];
 if (!empty($data['Village'])) $addr_parts[] = $data['Village'];
 if (!empty($data['Town'])) $addr_parts[] = $data['Town'];
 if (!empty($data['District'])) $addr_parts[] = $data['District'];
+if (!empty($data['State'])) $addr_parts[] = $data['State'] ;
 
 $display_address = !empty($addr_parts) ? implode(', ', $addr_parts) : '-';
 // 4. Image Path Resolution
@@ -33,9 +34,10 @@ $photo_src = '../../assets/images/default_profile.png';
 if (!empty($photo_db)) {
     // Handle paths starting with 'assets/' or relative 'uploads/'
     if (strpos($photo_db, 'assets/') === 0) {
+        // Fix: Use ../../ to navigate from 'modules/students/' back to project root
         $photo_src = '../../' . $photo_db; 
     } else {
-        $photo_src = '../../assets/' . $photo_db;
+        $photo_src = '../../assets/uploads/' . $photo_db;
     }
 }
 
@@ -116,7 +118,7 @@ $print_time = date('h:i:s A');
                     <td class="label">Residence</td><td class="value"><?php echo $d($data['Residence']); ?></td>
                 </tr>
                 <tr>
-                    <td class="label">Address</td><td class="value" colspan="3"><?php echo htmlspecialchars($display_address); ?></td>
+                    <td class="label">Address</td><td class="value" colspan="3"><?php echo htmlspecialchars($display_address.'.'); ?></td>
                 </tr>
             </table>
         </div>

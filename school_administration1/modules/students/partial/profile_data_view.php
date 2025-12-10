@@ -10,7 +10,9 @@ if (!empty($s['HouseNo'])) $displayAddress .= $s['HouseNo'] . ' ';
 if (!empty($s['Street'])) $displayAddress .= $s['Street'] . ', ';
 if (!empty($s['Village'])) $displayAddress .= $s['Village'] . ', ';
 if (!empty($s['Town'])) $displayAddress .= $s['Town'] . ' ';
-if (!empty($s['District'])) $displayAddress .= '(' . $s['District'] . ')';
+if (!empty($s['District'])) $displayAddress .= $s['District'] .', ' ;
+if (!empty($s['State'])) $displayAddress .= $s['State'] .'. ' ;
+
 if (empty(trim($displayAddress))) $displayAddress = 'N/A';
 ?>
 

@@ -110,9 +110,9 @@ $total = $summary_data['total_students'];
 
     <div class="tabbed-details-container">
         <div class="summary-tabs">
-            <button class="tab-button active" data-tab="entry-summary"><i class="fa fa-list"></i> Class & Stream List</button>
-            <button class="tab-button" data-tab="gender-summary"><i class="fa fa-venus-mars"></i> Gender Detail</button>
-            <button class="tab-button" data-tab="residence-summary"><i class="fa fa-bed"></i> Residence Detail</button>
+            <button class="tab-button active" data-tab="entry-summary">Class & Stream List</button>
+            <button class="tab-button" data-tab="gender-summary"> Gender Detail</button>
+            <button class="tab-button" data-tab="residence-summary">Residence Detail</button>
             </div>
 
         <div id="entry-summary" class="tab-content active">

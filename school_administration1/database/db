@@ -4,7 +4,7 @@ USE school_administration;
 -- 2. Disable Foreign Key Checks
 SET FOREIGN_KEY_CHECKS = 0;
 
--- 3. Drop All Tables
+-- 3. Drop All Tables (Cleans up everything, including old triggers)
 DROP TABLE IF EXISTS `enrollmenthistory`;
 DROP TABLE IF EXISTS `academichistory`;
 DROP TABLE IF EXISTS `enrollment`;
@@ -14,19 +14,18 @@ DROP TABLE IF EXISTS `students`;
 -- 4. Re-enable Foreign Key Checks
 SET FOREIGN_KEY_CHECKS = 1;
 
--- 5. Re-Create Tables
+-- =========================================================================
+-- 5. CREATE TABLES (Clean Version - No Warnings)
+-- =========================================================================
 
 -- Table: Students
--- Updated: 'CurrentAddress' removed. [cite_start]Split address columns added after 'Gender'. [cite: 4]
 CREATE TABLE `students` (
-  `StudentID` int(11) NOT NULL AUTO_INCREMENT,
-  `AdmissionYear` year(4) NOT NULL,
+  `StudentID` INT NOT NULL AUTO_INCREMENT, -- Changed from int(11) to INT
+  `AdmissionYear` YEAR NOT NULL,           -- Changed from year(4) to YEAR
   `Name` varchar(100) DEFAULT NULL,
   `Surname` varchar(100) NOT NULL,
   `DateOfBirth` date NOT NULL,
   `Gender` varchar(10) NOT NULL,
-  
-  -- Split Address Columns
   `HouseNo` VARCHAR(50) DEFAULT NULL,
   `Street` VARCHAR(100) DEFAULT NULL,
   `Village` VARCHAR(100) DEFAULT NULL,
@@ -34,55 +33,52 @@ CREATE TABLE `students` (
   `District` VARCHAR(100) DEFAULT NULL,
   `State` VARCHAR(100) DEFAULT NULL,
   `Country` VARCHAR(100) DEFAULT 'Uganda',
-  
   `PhotoPath` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`StudentID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: Parents
--- Updated: Added email columns for father, mother, and guardian. [cite: 5, 6]
 CREATE TABLE `parents` (
-  `ParentId` int(11) NOT NULL AUTO_INCREMENT,
-  `StudentID` int(11) NOT NULL,
+  `ParentId` INT NOT NULL, -- Changed from int(11) to INT
+  `StudentID` INT NOT NULL,
   
   -- Father details
   `father_name` varchar(255) NOT NULL, 
-  `father_age` int(11) DEFAULT NULL,
+  `father_age` INT DEFAULT NULL,
   `father_contact` varchar(50) DEFAULT NULL,
-  `father_email` VARCHAR(150) DEFAULT NULL, -- Added
+  `father_email` VARCHAR(150) DEFAULT NULL,
   `father_occupation` varchar(100) DEFAULT NULL,
   `father_education` varchar(100) DEFAULT NULL,
   
   -- Mother details
   `mother_name` varchar(255) NOT NULL,
-  `mother_age` int(11) DEFAULT NULL,
+  `mother_age` INT DEFAULT NULL,
   `mother_contact` varchar(50) DEFAULT NULL,
-  `mother_email` VARCHAR(150) DEFAULT NULL, -- Added
+  `mother_email` VARCHAR(150) DEFAULT NULL,
   `mother_occupation` varchar(100) DEFAULT NULL,
   `mother_education` varchar(100) DEFAULT NULL,
   
   -- Guardian details
   `guardian_name` varchar(255) DEFAULT NULL,
-  `guardian_relation` ENUM('Father','Mother','Uncle','Aunt','Grandparent','Other') DEFAULT NULL,
-  `guardian_age` int(11) DEFAULT NULL,
+  `guardian_relation` ENUM('Brother','Sister','Uncle','Aunt','Grandparent','Other') DEFAULT NULL,
+  `guardian_age` INT DEFAULT NULL,
   `guardian_contact` varchar(50) DEFAULT NULL,
-  `guardian_email` VARCHAR(150) DEFAULT NULL, -- Added
+  `guardian_email` VARCHAR(150) DEFAULT NULL,
   `guardian_occupation` varchar(100) DEFAULT NULL,
   `guardian_education` varchar(100) DEFAULT NULL,
   `guardian_address` text DEFAULT NULL,
   
-  -- Added Column
   `MoreInformation` text DEFAULT NULL,
   
   PRIMARY KEY (`ParentId`),
-  KEY `StudentID` (`StudentID`),
+  UNIQUE KEY `Unique_Student_Parent` (`StudentID`),
   CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table: Enrollment [cite: 7]
+-- Table: Enrollment
 CREATE TABLE `enrollment` (
-  `EnrollmentID` int(11) NOT NULL AUTO_INCREMENT,
-  `StudentID` int(11) NOT NULL,
+  `EnrollmentID` INT NOT NULL, -- Changed from int(11) to INT
+  `StudentID` INT NOT NULL,
   `AcademicYear` VARCHAR(20) NOT NULL,
   `Level` varchar(50) NOT NULL,
   `Class` varchar(50) NOT NULL,
@@ -90,28 +86,31 @@ CREATE TABLE `enrollment` (
   `Stream` varchar(50) DEFAULT NULL,
   `Residence` varchar(50) NOT NULL,
   `EntryStatus` varchar(50) NOT NULL,
+  
   PRIMARY KEY (`EnrollmentID`),
-  KEY `StudentID` (`StudentID`),
+  UNIQUE KEY `Unique_Student_Enrollment` (`StudentID`),
   CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
--- Table: AcademicHistory [cite: 8]
+
+-- Table: AcademicHistory
 CREATE TABLE `academichistory` (
-  `HistoryID` int(11) NOT NULL AUTO_INCREMENT,
-  `StudentID` int(11) NOT NULL,
+  `HistoryID` INT NOT NULL, -- Changed from int(11) to INT
+  `StudentID` INT NOT NULL,
   `FormerSchool` varchar(255) DEFAULT NULL,
   `PLEIndexNumber` varchar(50) DEFAULT NULL,
-  `PLEAggregate` int(11) DEFAULT NULL,
+  `PLEAggregate` INT DEFAULT NULL,
   `UCEIndexNumber` varchar(50) DEFAULT NULL,
   `UCEResult` text DEFAULT NULL,
+  
   PRIMARY KEY (`HistoryID`),
-  KEY `StudentID` (`StudentID`),
+  UNIQUE KEY `Unique_Student_History` (`StudentID`),
   CONSTRAINT `academichistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table: EnrollmentHistory [cite: 9]
+-- Table: EnrollmentHistory
 CREATE TABLE `enrollmenthistory` (
-  `HistoryID` int(11) NOT NULL AUTO_INCREMENT,
-  `StudentID` int(11) NOT NULL,
+  `EnrollmentHistoryID` INT NOT NULL AUTO_INCREMENT, -- Changed from int(11) to INT
+  `StudentID` INT NOT NULL,
   `AcademicYear` VARCHAR(20) NOT NULL,
   `Level` varchar(50) NOT NULL,
   `Class` varchar(50) NOT NULL,
@@ -120,7 +119,36 @@ CREATE TABLE `enrollmenthistory` (
   `Residence` varchar(50) NOT NULL,
   `EntryStatus` varchar(50) NOT NULL,
   `DateMoved` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`HistoryID`),
+  PRIMARY KEY (`EnrollmentHistoryID`),
   KEY `StudentID` (`StudentID`),
   CONSTRAINT `enrollmenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =========================================================================
+-- 6. TRIGGERS
+-- =========================================================================
+
+DELIMITER //
+
+-- Trigger for Parents
+CREATE TRIGGER `sync_parents_id` BEFORE INSERT ON `parents`
+FOR EACH ROW
+BEGIN
+    SET NEW.ParentId = NEW.StudentID;
+END//
+
+-- Trigger for Enrollment
+CREATE TRIGGER `sync_enrollment_id` BEFORE INSERT ON `enrollment`
+FOR EACH ROW
+BEGIN
+    SET NEW.EnrollmentID = NEW.StudentID;
+END//
+
+-- Trigger for AcademicHistory
+CREATE TRIGGER `sync_academichistory_id` BEFORE INSERT ON `academichistory`
+FOR EACH ROW
+BEGIN
+    SET NEW.HistoryID = NEW.StudentID;
+END//
+
+DELIMITER ;

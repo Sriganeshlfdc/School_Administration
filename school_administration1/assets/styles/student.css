@@ -1737,3 +1737,109 @@ fieldset.nested-fieldset legend {
 
     gap: 15px;
 }
+/* school_administration1/assets/styles/student.css */
+
+/* --- Photo Edit Section in Form --- */
+.edit-photo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    background-color: #fafafa;
+    margin-bottom: 20px;
+}
+
+.edit-photo-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 3px solid var(--primary-color-light);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.edit-photo-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+/* --- Custom Confirmation Popups --- */
+.custom-confirm-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 3000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.custom-confirm-backdrop.show {
+    display: flex;
+    opacity: 1;
+}
+
+.custom-confirm-box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.custom-confirm-backdrop.show .custom-confirm-box {
+    transform: scale(1);
+}
+
+.custom-confirm-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.icon-warn { color: orange; }
+.icon-save { color: var(--success-color); }
+
+.custom-confirm-title {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+    color: var(--text-color);
+}
+
+.custom-confirm-msg {
+    color: var(--text-color-light);
+    margin-bottom: 25px;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.custom-confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-popup {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: filter 0.2s;
+}
+
+.btn-popup:hover { filter: brightness(0.9); }
+.btn-popup-cancel { background-color: #e0e0e0; color: #333; }
+.btn-popup-confirm { background-color: var(--primary-color); color: white; }
+.btn-popup-danger { background-color: var(--danger-color); color: white; }
