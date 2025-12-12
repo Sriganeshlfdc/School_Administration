@@ -5,14 +5,14 @@ require_once __DIR__ . '/../../config/config.php';
 header('Content-Type: application/json');
 
 // 1. Validate Student ID
-$student_id = filter_input(INPUT_POST, 'StudentID', FILTER_SANITIZE_NUMBER_INT);
-if (!$student_id) {
+$Ad_no = filter_input(INPUT_POST, 'AdmissionNo', FILTER_SANITIZE_NUMBER_INT);
+if (!$Ad_no) {
     echo json_encode(['success' => false, 'message' => 'Student ID is required for folder selection.']);
     exit;
 }
 
 // 2. Define Student Directory (Not generic temp)
-$STUDENT_FOLDER_REL = "assets/uploads/students/$student_id/";
+$STUDENT_FOLDER_REL = "assets/uploads/students/$Ad_no/";
 $TARGET_DIR = __DIR__ . "/../../$STUDENT_FOLDER_REL";
 
 // Create directory if it doesn't exist

@@ -20,6 +20,7 @@
         <li><a href="#quickedit" id="quickedit">Quick Edit</a></li>
         <li><a href="#academicedit" id="academicedit">Academic Edit</a></li>
         <li><a href="#searchstudent" id="searchstudent">Search Student</a></li>
+        <li><a href="#studentphotos" id="studentphotos">Student Photos</a></li>
         <li><a href="#studentaccounts" id="studentaccounts">Student Accounts</a></li>
         <li><a href="#oldstudentdebt" id="oldstudentdebt">Old Students Debts</a></li>
         <li><a href="#oldstudentrec" id="oldstudentrec">Old Student Receipts</a></li>

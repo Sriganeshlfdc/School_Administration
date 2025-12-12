@@ -11,7 +11,7 @@ $current_year = date('Y');
         <form id="migration-controls-form" onsubmit="return false;">
             
             <fieldset>
-                <legend>1. Source Class (Select Students To Move)</legend>
+                <legend>1. Source Class</legend>
                 <div class="input-group">
                     <div class="field">
                         <label for="mig-source-year">Academic Year</label>
@@ -50,16 +50,17 @@ $current_year = date('Y');
                             ?>
                         </select>
                     </div>
-                    <div class="field fetch-action">
-                        <button type="button" id="btn-fetch-students" class="btn-primary">
-                            <i class="fa fa-search"></i> Fetch
+                    
+                </div>
+                <div class="field fetch-action">
+                        <button type="button" id="btn-fetch-students" class="btn-primary migrate-fetch-btn">
+                            Search
                         </button>
                     </div>
-                </div>
             </fieldset>
 
             <fieldset class="destination-set">
-                <legend>2. Destination (Migrate To)</legend>
+                <legend>2. Destination</legend>
                 <div class="input-group">
                     <div class="field">
                         <label for="mig-target-year" class="required">New Start Year</label>
@@ -106,17 +107,17 @@ $current_year = date('Y');
                     </div>
                 </div>
             </fieldset>
-
-            <div class="button-wrapper migration-actions">
+            
+            <div class="migration-actions">
                 <div class="selection-info">
-                    <span id="selection-count">0</span> students selected
+                <span id="selection-count">0</span> students selected
                 </div>
                 <div class="migration-btn-group">
-                    <button type="button" id="btn-migrate-class" class="btn-primary btn-migrate-all">
-                        <i class="fa fa-users"></i> Migrate Entire Class
+                    <button type="button" id="btn-migrate-selected" class="btn-primary btn-migrate-selected" style="background-color: #17a2b8;" >
+                        Migrate Selected
                     </button>
-                    <button type="button" id="btn-migrate-selected" class="btn-primary btn-migrate-selected">
-                        <i class="fa fa-check-square"></i> Migrate Selected
+                    <button type="button" id="btn-migrate-class" class="btn-primary btn-migrate-all" style="background-color: var(--success-color); ">
+                        Entire Class
                     </button>
                 </div>
             </div>

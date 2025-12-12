@@ -64,10 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // 1. Get Basic Info
-$student_id = filter_input(INPUT_POST, 'StudentID', FILTER_SANITIZE_NUMBER_INT);
+$Ad_no = filter_input(INPUT_POST, 'AdmissionNo', FILTER_SANITIZE_NUMBER_INT);
 $action = $_POST['action'] ?? 'update';
 
-if (!$student_id) {
+if (!$Ad_no) {
     echo json_encode(['success' => false, 'message' => 'Missing required Student ID.']);
     exit();
 }
@@ -90,7 +90,7 @@ if ($action === 'delete_temp') {
         exit;
     }
 
-    $targetPath = $UPLOAD_DIR . $student_id . '/' . $fileName;
+    $targetPath = $UPLOAD_DIR . $Ad_no . '/' . $fileName;
 
     if (file_exists($targetPath)) {
         if (unlink($targetPath)) {
@@ -127,16 +127,16 @@ try {
     $temp_filename = filter_input(INPUT_POST, 'temp_photo_filename', FILTER_SANITIZE_STRING);
     
     if (!empty($temp_filename)) {
-        $temp_abs_path = $UPLOAD_DIR . $student_id . '/' . $temp_filename;
+        $temp_abs_path = $UPLOAD_DIR . $Ad_no . '/' . $temp_filename;
         
         if (file_exists($temp_abs_path)) {
             // Generate Permanent Name (Remove 'temp_' prefix, add randomness)
             $ext = pathinfo($temp_filename, PATHINFO_EXTENSION);
-            $perm_filename = $student_id . '_' . uniqid() . '.' . $ext;
-            $perm_abs_path = $UPLOAD_DIR . $student_id . '/' . $perm_filename;
+            $perm_filename = $Ad_no . '_' . uniqid() . '.' . $ext;
+            $perm_abs_path = $UPLOAD_DIR . $Ad_no . '/' . $perm_filename;
             
             if (rename($temp_abs_path, $perm_abs_path)) {
-                $STUDENT_FOLDER_REL = rtrim($UPLOAD_FOLDER_REL, '/') . '/' . $student_id . '/';
+                $STUDENT_FOLDER_REL = rtrim($UPLOAD_FOLDER_REL, '/') . '/' . $Ad_no . '/';
                 $new_photo_path = $STUDENT_FOLDER_REL . $perm_filename;
                 $photo_updated = true;
             }
@@ -148,12 +148,12 @@ try {
         $filename = basename($file['name']);
         
         if ($file['size'] <= $MAX_FILE_SIZE && allowed_file($filename, $ALLOWED_EXTENSIONS)) {
-            $folder_name = $student_id . '/';
+            $folder_name = $Ad_no . '/';
             $STUDENT_DIR = $UPLOAD_DIR . $folder_name;
             if (!is_dir($STUDENT_DIR)) mkdir($STUDENT_DIR, 0777, true);
             
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-            $safe_filename = $student_id . '_' . uniqid() . '.' . $extension; 
+            $safe_filename = $Ad_no . '_' . uniqid() . '.' . $extension; 
             $file_path = $STUDENT_DIR . $safe_filename;
             
             if (move_uploaded_file($file['tmp_name'], $file_path)) {
@@ -164,8 +164,8 @@ try {
     }
 
     if ($photo_updated) {
-        $stmt_p = $conn->prepare("UPDATE Students SET PhotoPath = ? WHERE StudentID = ?");
-        $stmt_p->bind_param("si", $new_photo_path, $student_id);
+        $stmt_p = $conn->prepare("UPDATE Students SET PhotoPath = ? WHERE AdmissionNo = ?");
+        $stmt_p->bind_param("si", $new_photo_path, $Ad_no);
         $stmt_p->execute();
         $stmt_p->close();
         // Old photo is NOT deleted, acting as backup.
@@ -177,10 +177,10 @@ try {
     $enrollment_map = ['Level'=>'Level','Class'=>'Class','Stream'=>'Stream','Term'=>'Term','Residence'=>'Residence','EntryStatus'=>'EntryStatus','AcademicYear'=>'AcademicYear'];
     $academic_map = ['FormerSchool'=>'FormerSchool','PLEIndexNumber'=>'PLEIndexNumber','PLEAggregate'=>'PLEAggregate','UCEIndexNumber'=>'UCEIndexNumber','UCEResult'=>'UCEResult'];
 
-    build_dynamic_update('Students', 'StudentID', $student_id, $student_map, $conn);
-    build_dynamic_update('Parents', 'StudentID', $student_id, $parents_map, $conn);
-    build_dynamic_update('Enrollment', 'StudentID', $student_id, $enrollment_map, $conn);
-    build_dynamic_update('AcademicHistory', 'StudentID', $student_id, $academic_map, $conn);
+    build_dynamic_update('Students', 'AdmissionNo', $Ad_no, $student_map, $conn);
+    build_dynamic_update('Parents', 'AdmissionNo', $Ad_no, $parents_map, $conn);
+    build_dynamic_update('Enrollment', 'AdmissionNo', $Ad_no, $enrollment_map, $conn);
+    build_dynamic_update('AcademicHistory', 'AdmissionNo', $Ad_no, $academic_map, $conn);
 
     $conn->commit();
 

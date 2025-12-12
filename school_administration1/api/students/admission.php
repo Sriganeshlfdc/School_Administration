@@ -173,12 +173,12 @@ try {
     $stmt_stu = $conn->prepare($sql_stu);
     $stmt_stu->bind_param("isssssssssss", $admission_year, $name, $surname, $dob, $gender, $house, $street, $village, $town, $district, $state, $country);
     $stmt_stu->execute();
-    $student_id = $conn->insert_id; 
+    $Ad_no = $conn->insert_id; 
     $stmt_stu->close();
 
     // --- INSERT PARENTS ---
     $sql_par = "INSERT INTO Parents (
-        StudentID, 
+        AdmissionNo, 
         father_name, father_contact, father_email, father_age, father_occupation, father_education, 
         mother_name, mother_contact, mother_email, mother_age, mother_occupation, mother_education, 
         guardian_name, guardian_relation, guardian_contact, guardian_email, guardian_age, guardian_occupation, guardian_education, guardian_address, 
@@ -196,7 +196,7 @@ try {
     $more_info = $_POST['more_info'] ?? '';
 
     $stmt_par->bind_param("isssisssssissssssissss", 
-        $student_id, 
+        $Ad_no, 
         $father_name, $father_contact, $f_email, $f_age, $f_occ, $f_edu,
         $mother_name, $mother_contact, $m_email, $m_age, $m_occ, $m_edu,
         $final_g_name, $final_g_relation, $final_g_contact, $final_g_email, $final_g_age, $final_g_occ, $final_g_edu, $final_g_addr,
@@ -206,7 +206,7 @@ try {
     $stmt_par->close();
 
     // --- INSERT ACADEMIC HISTORY ---
-    $sql_hist = "INSERT INTO AcademicHistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql_hist = "INSERT INTO AcademicHistory (AdmissionNo, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt_hist = $conn->prepare($sql_hist);
     
     $former = $_POST['former_school'] ?? '';
@@ -215,14 +215,14 @@ try {
     $uce_idx = $_POST['uce_index'] ?? '';
     $uce_res = $_POST['uce_result'] ?? '';
 
-    $stmt_hist->bind_param("ississ", $student_id, $former, $ple_idx, $ple_agg, $uce_idx, $uce_res);
+    $stmt_hist->bind_param("ississ", $Ad_no, $former, $ple_idx, $ple_agg, $uce_idx, $uce_res);
     $stmt_hist->execute();
     $stmt_hist->close();
 
     // --- INSERT ENROLLMENT ---
-    $sql_enr = "INSERT INTO Enrollment (StudentID, AcademicYear, Term, Class, Level, Stream, Residence, EntryStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $sql_enr = "INSERT INTO Enrollment (AdmissionNo, AcademicYear, Term, Class, Level, Stream, Residence, EntryStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt_enr = $conn->prepare($sql_enr);
-    $stmt_enr->bind_param("isssssss", $student_id, $academic_year_string, $term, $class_grade, $level, $stream, $residence, $entry_status);
+    $stmt_enr->bind_param("isssssss", $Ad_no, $academic_year_string, $term, $class_grade, $level, $stream, $residence, $entry_status);
     $stmt_enr->execute();
     $stmt_enr->close();
 
@@ -237,24 +237,24 @@ try {
         $file = $_FILES['photo'];
         // Re-check validation (redundant but safe)
         if ($file['size'] <= $MAX_FILE_SIZE) {
-            $folder = $student_id . '/';
+            $folder = $Ad_no . '/';
             if (!is_dir($UPLOAD_DIR . $folder)) mkdir($UPLOAD_DIR . $folder, 0755, true);
             
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $safe_name = $student_id . '_' . uniqid() . '.' . $ext;
+            $safe_name = $Ad_no . '_' . uniqid() . '.' . $ext;
             
             if (move_uploaded_file($file['tmp_name'], $UPLOAD_DIR . $folder . $safe_name)) {
                 $photo_path = $UPLOAD_FOLDER_REL . $folder . $safe_name;
                 $uploaded_file_path = $UPLOAD_DIR . $folder . $safe_name;
                 
-                $conn->query("UPDATE Students SET PhotoPath = '$photo_path' WHERE StudentID = $student_id");
+                $conn->query("UPDATE Students SET PhotoPath = '$photo_path' WHERE AdmissionNo = $Ad_no");
             }
         }
     }
 
     // ALL GOOD: Commit
     $conn->commit();
-    echo json_encode(['success' => true, 'message' => "Student admitted successfully. ID: $student_id"]);
+    echo json_encode(['success' => true, 'message' => "Student admitted successfully. ID: $Ad_no"]);
 
 } catch (\Throwable $e) {
     // ERROR: Rollback

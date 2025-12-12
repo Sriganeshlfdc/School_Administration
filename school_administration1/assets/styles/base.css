@@ -34,6 +34,12 @@
   --danger-color: #e53935;
   --danger-bg: #ffebee;
   --accent-icon-color: var(--primary-color);
+  --info-color: hwb(47 0% 0%);
+  --warning-color: hsl(348, 100%, 61%);
+  --modal-backdrop: rgba(0, 0, 0, 0.6);
+  --modal-message-color: #555555;
+  --modal-summary-bg: #f8f9fa;
+  --modal-icon-bg: #e3f2fd; /* Light blue background for icons */
 }
 
 .dark-theme {
@@ -58,6 +64,12 @@
   --danger-color: #ff5252;
   --danger-bg: #4a3a3a;
   --accent-icon-color: var(--primary-color);
+  --info-color: hwb(47 0% 0%);
+  --warning-color: hsl(348, 100%, 61%);
+  --modal-backdrop: rgba(0, 0, 0, 0.85);
+  --modal-message-color: #bbbbbb;
+  --modal-summary-bg: #2a304d; /* Matches dark card bg */
+  --modal-icon-bg: #3a405f;    /* Darker background for icons */
 }
 
 
@@ -368,9 +380,9 @@ a {
 /* --- MEDIA QUERIES (Responsiveness) --- */
 @media (max-width: 768px) {
     .navbar { padding: 0 16px; }
-    .navbar i{ font-size: 1rem;}
+    .navbar i{ font-size: 0.9rem;}
     .navbar .left, .navbar .middle ,.navbar .right{ gap: 0px;}
-    .navbar .middle h1{ font-size: 24px; }
+    .navbar .middle h1{ font-size: 22px; }
     .navbar button{padding: 0px;}
     .sidebar {
         width: 250px;

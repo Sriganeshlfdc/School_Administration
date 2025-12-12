@@ -21,9 +21,9 @@ if (!$conn) {
 
 // Dynamic Query Construction
 $sql = "
-    SELECT S.StudentID, S.Name, S.Surname, S.PhotoPath, E.Level, E.Class, E.Stream, E.AcademicYear
+    SELECT S.AdmissionNo, S.Name, S.Surname, S.PhotoPath, E.Level, E.Class, E.Stream, E.AcademicYear
     FROM Students S
-    JOIN Enrollment E ON S.StudentID = E.StudentID
+    JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo
     WHERE E.Level = ? AND E.Class = ?
 ";
 

@@ -3,21 +3,21 @@
 require_once __DIR__ . '/../../config/config.php';
 
 // 1. Validate ID
-$student_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
-if (!$student_id) die("Error: Student ID required.");
+$Ad_no = filter_input(INPUT_GET, 'ad_no', FILTER_SANITIZE_NUMBER_INT);
+if (!$Ad_no) die("Error: Admission No required.");
 
 // 2. Fetch Data
 $conn = get_db_connection($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 $data = null;
 if ($conn) {
-    $data = fetch_full_student_data($conn, $student_id);
+    $data = fetch_full_student_data($conn, $Ad_no);
     $conn->close();
 }
 if (!$data) die("Error: Student not found.");
 
 // 3. Data Formatting Helpers
 $d = fn($v) => !empty($v) ? htmlspecialchars($v) : '-';
-$fmtID = fn($id) => str_pad($id, 3, '0', STR_PAD_LEFT);
+$fmtID = fn($ad_no) => str_pad($ad_no, 3, '0', STR_PAD_LEFT);
 // Construct Address from split fields
 $addr_parts = [];
 if (!empty($data['HouseNo'])) $addr_parts[] = $data['HouseNo'];
@@ -88,8 +88,8 @@ $print_time = date('h:i:s A');
                         <td class="val-lg"><?php echo htmlspecialchars($data['Name'] . ' ' . $data['Surname']); ?></td>
                     </tr>
                     <tr>
-                        <td class="label">Student ID:</td>
-                        <td class="val"><strong><?php echo $fmtID($data['StudentID']); ?></strong></td>
+                        <td class="label">Admission No:</td>
+                        <td class="val"><strong><?php echo $fmtID($data['AdmissionNo']); ?></strong></td>
                     </tr>
                     <tr>
                         <td class="label">Class:</td>

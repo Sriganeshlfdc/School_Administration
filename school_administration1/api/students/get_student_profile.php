@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . '/../../config/config.php';
 
-$student_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+$Ad_no = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 
-if (!$student_id) {
+if (!$Ad_no) {
     echo "<div class='error-message' style='color:var(--danger-color); padding:20px; text-align:center;'>Error: Student ID is required.</div>";
     exit;
 }
@@ -12,7 +12,7 @@ $conn = get_db_connection($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
 $student_data = null;
 
 if ($conn) {
-    $student_data = fetch_full_student_data($conn, $student_id);
+    $student_data = fetch_full_student_data($conn, $Ad_no);
     $conn->close();
 }
 
@@ -29,7 +29,6 @@ $full_name = $format($student_data['Name']) . ' ' . $format($student_data['Surna
 
 <div class="viewer-container">
     <div class="top-action-bar">
-        <button class="btn-primary" style="background-color: #6c757d;" onclick="handleNavigate('list')"><i class="fa fa-arrow-left"></i> Back to List</button>
         <button id="edit-btn" onclick="togglePageEditMode('edit')" class="btn-primary"><i class="fa fa-edit"></i> Edit Details</button>
         
         <div id="save-cancel-group" style="display:none; gap: 10px;">
@@ -37,19 +36,19 @@ $full_name = $format($student_data['Name']) . ' ' . $format($student_data['Surna
             <button onclick="togglePageEditMode('view')" class="btn-primary" style="background-color: #6c757d;"><i class="fa fa-times-circle"></i> Cancel</button>
         </div>
         
-        <button onclick="printStudentProfile(<?php echo $val($student_id); ?>)" class="btn-primary" style="background-color: #17a2b8;">
+        <button onclick="printStudentProfile(<?php echo $val($Ad_no); ?>)" class="btn-primary" style="background-color: #17a2b8;">
             <i class="fa fa-print"></i> Print
         </button>
         
         <div style="flex-grow: 1;"></div>
-        <button class="btn-primary" onclick="window.showDeleteConfirmModal('<?php echo $val($student_id); ?>', '<?php echo $full_name; ?>')" style="background-color: var(--danger-color);"><i class="fa fa-trash"></i> Delete</button>
+        <button class="btn-primary" onclick="window.showDeleteConfirmModal('<?php echo $val($Ad_no); ?>', '<?php echo $full_name; ?>')" style="background-color: var(--danger-color);"><i class="fa fa-trash"></i> Delete</button>
     </div>
 
     <div class="unified-frame single-column-layout">
         <div class="profile-header-inline">
             <div class="header-info">
                 <h3 id="display-name-header"><?php echo $full_name; ?></h3>
-                <p class="id-badge">ID: <strong><?php echo str_pad($student_id, 4, '0', STR_PAD_LEFT); ?></strong></p>
+                <p class="id-badge">ID: <strong><?php echo str_pad($Ad_no, 4, '0', STR_PAD_LEFT); ?></strong></p>
                 <p class="status-badge">
                     <span class="badge"><?php echo $val($student_data['Level']); ?></span> 
                     <i class="fa fa-chevron-right" style="font-size: 0.8em; opacity: 0.5; margin: 0 5px;"></i>

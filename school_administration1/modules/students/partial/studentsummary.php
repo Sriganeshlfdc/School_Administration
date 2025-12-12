@@ -58,21 +58,21 @@ if ($conn) {
     }
     
     // 1. Total & Basic Stats (Unchanged logic)
-    $sql_total = "SELECT COUNT(S.StudentID) AS count FROM Students S JOIN Enrollment E ON S.StudentID = E.StudentID" . $where_sql;
+    $sql_total = "SELECT COUNT(S.AdmissionNo) AS count FROM Students S JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo" . $where_sql;
     $res = fetch_summary_data($conn, $sql_total, $params, $types);
     $summary_data['total_students'] = $res[0]['count'] ?? 0;
 
-    $summary_data['by_level'] = fetch_summary_data($conn, "SELECT E.Level, COUNT(S.StudentID) AS count FROM Students S JOIN Enrollment E ON S.StudentID = E.StudentID $where_sql GROUP BY E.Level ORDER BY count DESC", $params, $types);
-    $summary_data['by_gender'] = fetch_summary_data($conn, "SELECT S.Gender, COUNT(S.StudentID) AS count FROM Students S JOIN Enrollment E ON S.StudentID = E.StudentID $where_sql GROUP BY S.Gender ORDER BY count DESC", $params, $types);
-    $summary_data['by_residence'] = fetch_summary_data($conn, "SELECT E.Residence, COUNT(S.StudentID) AS count FROM Students S JOIN Enrollment E ON S.StudentID = E.StudentID $where_sql GROUP BY E.Residence ORDER BY count DESC", $params, $types);
+    $summary_data['by_level'] = fetch_summary_data($conn, "SELECT E.Level, COUNT(S.AdmissionNo) AS count FROM Students S JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo $where_sql GROUP BY E.Level ORDER BY count DESC", $params, $types);
+    $summary_data['by_gender'] = fetch_summary_data($conn, "SELECT S.Gender, COUNT(S.AdmissionNo) AS count FROM Students S JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo $where_sql GROUP BY S.Gender ORDER BY count DESC", $params, $types);
+    $summary_data['by_residence'] = fetch_summary_data($conn, "SELECT E.Residence, COUNT(S.AdmissionNo) AS count FROM Students S JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo $where_sql GROUP BY E.Residence ORDER BY count DESC", $params, $types);
 
     // 2. UPDATED: Class AND Stream Grouping
     // Entry Status by Class + Stream
-    $sql_entry = "SELECT E.Class, E.Stream, E.EntryStatus, COUNT(S.StudentID) AS count FROM Students S JOIN Enrollment E ON S.StudentID = E.StudentID $where_sql GROUP BY E.Class, E.Stream, E.EntryStatus ORDER BY E.Class, E.Stream";
+    $sql_entry = "SELECT E.Class, E.Stream, E.EntryStatus, COUNT(S.AdmissionNo) AS count FROM Students S JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo $where_sql GROUP BY E.Class, E.Stream, E.EntryStatus ORDER BY E.Class, E.Stream";
     $summary_data['by_class_stream_entry'] = fetch_summary_data($conn, $sql_entry, $params, $types);
 
     // Gender by Class + Stream
-    $sql_class_gender = "SELECT E.Class, E.Stream, S.Gender, COUNT(S.StudentID) AS count FROM Students S JOIN Enrollment E ON S.StudentID = E.StudentID $where_sql GROUP BY E.Class, E.Stream, S.Gender ORDER BY E.Class, E.Stream";
+    $sql_class_gender = "SELECT E.Class, E.Stream, S.Gender, COUNT(S.AdmissionNo) AS count FROM Students S JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo $where_sql GROUP BY E.Class, E.Stream, S.Gender ORDER BY E.Class, E.Stream";
     $summary_data['by_class_stream_gender'] = fetch_summary_data($conn, $sql_class_gender, $params, $types);
 
     $conn->close();

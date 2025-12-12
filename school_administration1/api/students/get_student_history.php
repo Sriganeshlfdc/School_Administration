@@ -3,9 +3,9 @@
 require_once __DIR__ . '/../../config/config.php';
 header('Content-Type: application/json');
 
-$student_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+$Ad_no = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 
-if (!$student_id) {
+if (!$Ad_no) {
     echo json_encode(['success' => false, 'message' => 'Student ID is required']);
     exit;
 }
@@ -19,11 +19,11 @@ if (!$conn) {
 // Fetch history records (Snapshots of previous enrollment data)
 $sql = "SELECT AcademicYear, Term, Class, Stream, Level, Residence, EntryStatus, DateMoved 
         FROM EnrollmentHistory 
-        WHERE StudentID = ? 
+        WHERE AdmissionNo = ? 
         ORDER BY DateMoved DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $student_id);
+$stmt->bind_param("i", $Ad_no);
 $stmt->execute();
 $result = $stmt->get_result();
 

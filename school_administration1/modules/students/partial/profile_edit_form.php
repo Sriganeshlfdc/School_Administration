@@ -4,7 +4,7 @@ if (!isset($val)) { $val = fn($v) => htmlspecialchars($v ?? ''); }
 $currentPhoto = !empty($student_data['PhotoPath']) ? $student_data['PhotoPath'] : 'static/images/default_profile.png';
 ?>
 <form id="edit-mode-form" class="profile-grid-system" method="POST" enctype="multipart/form-data" style="display: none;">
-    <input type="hidden" name="StudentID" value="<?php echo $val($student_data['StudentID']); ?>">
+    <input type="hidden" name="AdmissionNo" value="<?php echo $val($student_data['AdmissionNo']); ?>">
     
     <input type="hidden" name="temp_photo_filename" id="temp-photo-filename" value="">
     <input type="file" id="edit-photo-input" name="photo" accept="image/*" style="display: none;">

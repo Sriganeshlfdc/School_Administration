@@ -48,11 +48,11 @@ function get_db_connection_transactional($host, $user, $pass, $db_name) {
     }
 }
 
-function fetch_full_student_data($conn, $student_id) {
+function fetch_full_student_data($conn, $Ad_no) {
     // UPDATED: Now selects split address fields and parent emails
     $sql = "
         SELECT 
-            S.StudentID, S.AdmissionYear, S.Name, S.Surname, S.DateOfBirth, S.Gender, S.PhotoPath,
+            S.AdmissionNo, S.AdmissionYear, S.Name, S.Surname, S.DateOfBirth, S.Gender, S.PhotoPath,
             -- Split Address Columns
             S.HouseNo, S.Street, S.Village, S.Town, S.District, S.State, S.Country,
             
@@ -68,17 +68,17 @@ function fetch_full_student_data($conn, $student_id) {
             P.MoreInformation AS GuardianNotes,
             
             -- Academic & Enrollment
-            A.FormerSchool, A.PLEIndexNumber, A.PLEAggregate, A.UCEIndexNumber, A.UCEResult,
+            A.FormerSchool, A.PLEIndexNumber, A.PLEAggregate, A.UCEIndexNumber, A.UCEResult,A.LIN,
             E.Class, E.Level, E.Term, E.AcademicYear, E.Residence, E.EntryStatus, E.Stream
         FROM Students S
-        JOIN Enrollment E ON S.StudentID = E.StudentID
-        LEFT JOIN Parents P ON S.StudentID = P.StudentID        
-        LEFT JOIN AcademicHistory A ON S.StudentID = A.StudentID 
-        WHERE S.StudentID = ?
+        JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo
+        LEFT JOIN Parents P ON S.AdmissionNo = P.AdmissionNo        
+        LEFT JOIN AcademicHistory A ON S.AdmissionNo = A.AdmissionNo 
+        WHERE S.AdmissionNo = ?
     ";
     $stmt = $conn->prepare($sql);
     if ($stmt) {
-        $stmt->bind_param("i", $student_id);
+        $stmt->bind_param("i", $Ad_no);
         $stmt->execute();
         $result = $stmt->get_result();
         $data = $result->fetch_assoc();

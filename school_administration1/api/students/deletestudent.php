@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET' || !isset($_GET['id'])) {
     exit;
 }
 
-$student_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+$Ad_no = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 global $DB_HOST, $DB_USER, $DB_PASS, $DB_NAME, $UPLOAD_DIR_BASE;
 
 function rmdir_recursive($dir) {
@@ -29,8 +29,8 @@ if (!$conn) {
 
 try {
     // Get photo path for cleanup
-    $stmt = $conn->prepare("SELECT PhotoPath FROM Students WHERE StudentID = ?");
-    $stmt->bind_param("i", $student_id);
+    $stmt = $conn->prepare("SELECT PhotoPath FROM Students WHERE AdmissionNo = ?");
+    $stmt->bind_param("i", $Ad_no);
     $stmt->execute();
     $res = $stmt->get_result();
     $row = $res->fetch_assoc();
@@ -43,19 +43,19 @@ try {
     // Delete Dependents
     $tables = ['Enrollment', 'Parents', 'AcademicHistory', 'EnrollmentHistory'];
     foreach ($tables as $tbl) {
-        $conn->query("DELETE FROM $tbl WHERE StudentID = $student_id");
+        $conn->query("DELETE FROM $tbl WHERE AdmissionNo = $Ad_no");
     }
 
     // Delete Student
-    $stmt_del = $conn->prepare("DELETE FROM Students WHERE StudentID = ?");
-    $stmt_del->bind_param("i", $student_id);
+    $stmt_del = $conn->prepare("DELETE FROM Students WHERE AdmissionNo = ?");
+    $stmt_del->bind_param("i", $Ad_no);
     if (!$stmt_del->execute()) throw new Exception($stmt_del->error);
     $stmt_del->close();
 
     $conn->commit();
 
     // File Cleanup
-    $student_dir = $UPLOAD_DIR_BASE . $student_id . '/';
+    $student_dir = $UPLOAD_DIR_BASE . $Ad_no . '/';
     if (is_dir($student_dir)) {
         rmdir_recursive($student_dir);
     }

@@ -20,7 +20,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- Table: Students
 CREATE TABLE `students` (
-  `StudentID` INT NOT NULL AUTO_INCREMENT, -- Changed from int(11) to INT
+  `AdmissionNo` INT NOT NULL AUTO_INCREMENT, -- Changed from int(11) to INT
   `AdmissionYear` YEAR NOT NULL,           -- Changed from year(4) to YEAR
   `Name` varchar(100) DEFAULT NULL,
   `Surname` varchar(100) NOT NULL,
@@ -34,13 +34,13 @@ CREATE TABLE `students` (
   `State` VARCHAR(100) DEFAULT NULL,
   `Country` VARCHAR(100) DEFAULT 'Uganda',
   `PhotoPath` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`StudentID`)
+  PRIMARY KEY (`AdmissionNo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: Parents
 CREATE TABLE `parents` (
   `ParentId` INT NOT NULL, -- Changed from int(11) to INT
-  `StudentID` INT NOT NULL,
+  `AdmissionNo` INT NOT NULL,
   
   -- Father details
   `father_name` varchar(255) NOT NULL, 
@@ -71,14 +71,14 @@ CREATE TABLE `parents` (
   `MoreInformation` text DEFAULT NULL,
   
   PRIMARY KEY (`ParentId`),
-  UNIQUE KEY `Unique_Student_Parent` (`StudentID`),
-  CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
+  UNIQUE KEY `Unique_Student_Parent` (`AdmissionNo`),
+  CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: Enrollment
 CREATE TABLE `enrollment` (
   `EnrollmentID` INT NOT NULL, -- Changed from int(11) to INT
-  `StudentID` INT NOT NULL,
+  `AdmissionNo` INT NOT NULL,
   `AcademicYear` VARCHAR(20) NOT NULL,
   `Level` varchar(50) NOT NULL,
   `Class` varchar(50) NOT NULL,
@@ -88,14 +88,14 @@ CREATE TABLE `enrollment` (
   `EntryStatus` varchar(50) NOT NULL,
   
   PRIMARY KEY (`EnrollmentID`),
-  UNIQUE KEY `Unique_Student_Enrollment` (`StudentID`),
-  CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
+  UNIQUE KEY `Unique_Student_Enrollment` (`AdmissionNo`),
+  CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: AcademicHistory
 CREATE TABLE `academichistory` (
   `HistoryID` INT NOT NULL, -- Changed from int(11) to INT
-  `StudentID` INT NOT NULL,
+  `AdmissionNo` INT NOT NULL,
   `FormerSchool` varchar(255) DEFAULT NULL,
   `PLEIndexNumber` varchar(50) DEFAULT NULL,
   `PLEAggregate` INT DEFAULT NULL,
@@ -103,14 +103,14 @@ CREATE TABLE `academichistory` (
   `UCEResult` text DEFAULT NULL,
   
   PRIMARY KEY (`HistoryID`),
-  UNIQUE KEY `Unique_Student_History` (`StudentID`),
-  CONSTRAINT `academichistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
+  UNIQUE KEY `Unique_Student_History` (`AdmissionNo`),
+  CONSTRAINT `academichistory_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: EnrollmentHistory
 CREATE TABLE `enrollmenthistory` (
   `EnrollmentHistoryID` INT NOT NULL AUTO_INCREMENT, -- Changed from int(11) to INT
-  `StudentID` INT NOT NULL,
+  `AdmissionNo` INT NOT NULL,
   `AcademicYear` VARCHAR(20) NOT NULL,
   `Level` varchar(50) NOT NULL,
   `Class` varchar(50) NOT NULL,
@@ -120,8 +120,8 @@ CREATE TABLE `enrollmenthistory` (
   `EntryStatus` varchar(50) NOT NULL,
   `DateMoved` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`EnrollmentHistoryID`),
-  KEY `StudentID` (`StudentID`),
-  CONSTRAINT `enrollmenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE
+  KEY `AdmissionNo` (`AdmissionNo`),
+  CONSTRAINT `enrollmenthistory_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =========================================================================
@@ -134,21 +134,21 @@ DELIMITER //
 CREATE TRIGGER `sync_parents_id` BEFORE INSERT ON `parents`
 FOR EACH ROW
 BEGIN
-    SET NEW.ParentId = NEW.StudentID;
+    SET NEW.ParentId = NEW.AdmissionNo;
 END//
 
 -- Trigger for Enrollment
 CREATE TRIGGER `sync_enrollment_id` BEFORE INSERT ON `enrollment`
 FOR EACH ROW
 BEGIN
-    SET NEW.EnrollmentID = NEW.StudentID;
+    SET NEW.EnrollmentID = NEW.AdmissionNo;
 END//
 
 -- Trigger for AcademicHistory
 CREATE TRIGGER `sync_academichistory_id` BEFORE INSERT ON `academichistory`
 FOR EACH ROW
 BEGIN
-    SET NEW.HistoryID = NEW.StudentID;
+    SET NEW.HistoryID = NEW.AdmissionNo;
 END//
 
 DELIMITER ;

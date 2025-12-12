@@ -6,7 +6,7 @@ global $DB_HOST, $DB_USER, $DB_PASS, $DB_NAME;
 $conn = get_db_connection($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME); 
 
 if ($conn) {
-    $sql = "SELECT COUNT(StudentID) AS count FROM Students";
+    $sql = "SELECT COUNT(AdmissionNo) AS count FROM Students";
     $result = $conn->query($sql);
     if ($result && $row = $result->fetch_assoc()) {
         $total_students = $row['count'];

@@ -22,21 +22,21 @@ $results = [];
 if ($conn) {
     $sql = "
         SELECT 
-            S.StudentID, S.AdmissionYear, S.Name, S.Surname, S.PhotoPath, S.Gender,
+            S.AdmissionNo, S.AdmissionYear, S.Name, S.Surname, S.PhotoPath, S.Gender,
             P.father_name, P.father_contact,
             P.mother_name, P.mother_contact,
             E.Class, E.Level, E.Residence, E.Stream, E.AcademicYear, E.Term
         FROM Students S
-        JOIN Enrollment E ON S.StudentID = E.StudentID
-        LEFT JOIN Parents P ON S.StudentID = P.StudentID        
-        WHERE 1=1 
+        JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo
+        LEFT JOIN Parents P ON S.AdmissionNo = P.AdmissionNo        
+        WHERE 1=1
     ";
     
     $params = [];
     $types = '';
     
     if (!empty($search_id)) {
-        $sql .= " AND S.StudentID = ?";
+        $sql .= " AND S.AdmissionNo = ?";
         $types .= 'i';
         $params[] = $search_id;
     } else {
@@ -55,7 +55,7 @@ if ($conn) {
         if (!empty($filter_gender)) { $sql .= " AND S.Gender = ?"; $types .= 's'; $params[] = $filter_gender; }
     }
 
-    $sql .= " ORDER BY E.Level ASC, E.Class ASC, E.Stream ASC, S.Name ASC LIMIT 200";
+    $sql .= " ORDER BY S.AdmissionNo ASC";
 
     $stmt = $conn->prepare($sql);
     if ($stmt) {
@@ -91,7 +91,7 @@ if ($conn) {
                         <td><img src="<?php echo htmlspecialchars($student['PhotoPath'] ?? 'static/images/default_profile.png'); ?>" class="student-photo-thumb"></td>
                         <td>
                             <strong><?php echo htmlspecialchars($student['Name'] . ' ' . $student['Surname']); ?></strong><br>
-                            <small>ID: <?php echo $student['StudentID']; ?> | <?php echo $student['Gender']; ?></small>
+                            <small>Adm-no: <?php echo $student['AdmissionNo']; ?> | <?php echo $student['Gender']; ?></small>
                         </td>
                         <td>
                             <?php echo htmlspecialchars($student['Class']); ?> 
@@ -103,10 +103,10 @@ if ($conn) {
                         <td><?php echo htmlspecialchars($student['Residence']); ?><br><small><?php echo htmlspecialchars($student['Term']); ?></small></td>
                         <td>
                             <div style="display:flex; gap:5px; justify-content:center; align-items:center;">
-                                <button class="btn-action view-btn" onclick="loadProfileViaAjax(<?php echo $student['StudentID']; ?>)">
+                                <button class="btn-action view-btn" onclick="loadProfileViaAjax(<?php echo $student['AdmissionNo']; ?>)">
                                     <i class="fa fa-user" style="padding: 2px;"></i> Profile
                                 </button>
-                                <button class="btn-action delete-btn js-delete-student" data-id="<?php echo $student['StudentID']; ?>" data-name="<?php echo htmlspecialchars($student['Name'] . ' ' . $student['Surname']); ?>">
+                                <button class="btn-action delete-btn js-delete-student" data-id="<?php echo $student['AdmissionNo']; ?>" data-name="<?php echo htmlspecialchars($student['Name'] . ' ' . $student['Surname']); ?>">
                                     <i class="fa fa-trash"></i>Delete
                                 </button>
                             </div>

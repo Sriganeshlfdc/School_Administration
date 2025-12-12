@@ -1,6 +1,12 @@
 <?php
+// api/students/migrate_backend.php
 require_once __DIR__ . '/../../config/config.php';
 header('Content-Type: application/json');
+
+// 1. Disable error printing to prevent JSON syntax errors
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -21,7 +27,6 @@ if (empty($student_ids) || empty($target_year) || empty($target_term) || empty($
     exit;
 }
 
-// FORMAT ACADEMIC YEAR (YYYY-YY)
 $target_academic_year = format_academic_year($target_year);
 
 $conn = get_db_connection_transactional($DB_HOST, $DB_USER, $DB_PASS, $DB_NAME);
@@ -31,7 +36,7 @@ if (!$conn) {
 }
 
 try {
-    // 1. Capacity Check of Target Class
+    // 2. Check Capacity
     $sql_check = "SELECT COUNT(*) as count FROM Enrollment 
                   WHERE AcademicYear = ? AND Class = ? AND Stream = ?";
     $stmt_check = $conn->prepare($sql_check);
@@ -45,32 +50,27 @@ try {
 
     $incoming_count = count($student_ids);
     
-    if (($current_count + $incoming_count) > MAX_STUDENTS_PER_STREAM) {
-        throw new Exception("Migration Blocked: Target Class $target_class ($target_stream) has $current_count students. Adding $incoming_count would exceed the limit of " . MAX_STUDENTS_PER_STREAM . ".");
+    if (defined('MAX_STUDENTS_PER_STREAM') && ($current_count + $incoming_count) > MAX_STUDENTS_PER_STREAM) {
+        throw new Exception("Migration Blocked: Class is full ($current_count students). Limit: " . MAX_STUDENTS_PER_STREAM);
     }
 
-    // 2. History Insert (Preserve previous state)
-    $sql_hist = "
-        INSERT INTO EnrollmentHistory (StudentID, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus)
-        SELECT StudentID, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus
-        FROM Enrollment WHERE StudentID = ?
-    ";
+    // 3. Migrate Students
+    $sql_hist = "INSERT INTO EnrollmentHistory (AdmissionNo, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus)
+                 SELECT AdmissionNo, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus
+                 FROM Enrollment WHERE AdmissionNo = ?";
     $stmt_hist = $conn->prepare($sql_hist);
 
-    // 3. Update Enrollment with new AcademicYear string
-    $sql_update = "UPDATE Enrollment SET AcademicYear = ?, Term = ?, Level = ?, Class = ?, Stream = ? WHERE StudentID = ?";
+    $sql_update = "UPDATE Enrollment SET AcademicYear = ?, Term = ?, Level = ?, Class = ?, Stream = ? WHERE AdmissionNo = ?";
     $stmt_update = $conn->prepare($sql_update);
-
-    if (!$stmt_update) throw new Exception("Prepare failed: " . $conn->error);
 
     $success_count = 0;
 
     foreach ($student_ids as $id) {
-        if ($stmt_hist) {
-            $stmt_hist->bind_param("i", $id);
-            $stmt_hist->execute(); 
-        }
+        // Save History
+        $stmt_hist->bind_param("i", $id);
+        $stmt_hist->execute(); 
 
+        // Update Record
         $stmt_update->bind_param("sssssi", $target_academic_year, $target_term, $target_level, $target_class, $target_stream, $id);
         if (!$stmt_update->execute()) {
             throw new Exception("Failed to migrate Student ID: $id");
@@ -79,9 +79,15 @@ try {
     }
 
     $conn->commit();
+    
+    // 4. Return Success with ALL variables separated
     echo json_encode([
         'success' => true, 
-        'message' => "Successfully migrated $success_count student(s) to $target_academic_year."
+        'count' => $success_count,
+        'target_class' => $target_class,
+        'target_stream' => $target_stream,
+        'target_year' => $target_year,
+        'message' => "Successfully migrated $success_count student(s)."
     ]);
 
 } catch (Exception $e) {

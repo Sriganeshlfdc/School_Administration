@@ -1,31 +1,157 @@
+-- =========================================================================
+-- 1. SETUP DATABASE & FIX TRIGGERS
+-- =========================================================================
+USE school_administration;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Drop Tables (Clean Slate)
+DROP TABLE IF EXISTS `enrollmenthistory`;
+DROP TABLE IF EXISTS `academichistory`;
+DROP TABLE IF EXISTS `enrollment`;
+DROP TABLE IF EXISTS `parents`;
+DROP TABLE IF EXISTS `students`;
+
+-- Re-enable checks for creation
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Table: Students
+CREATE TABLE `students` (
+  `AdmissionNo` INT NOT NULL AUTO_INCREMENT,
+  `AdmissionYear` YEAR NOT NULL,
+  `Name` varchar(100) DEFAULT NULL,
+  `Surname` varchar(100) NOT NULL,
+  `DateOfBirth` date NOT NULL,
+  `Gender` varchar(10) NOT NULL,
+  `HouseNo` VARCHAR(50) DEFAULT NULL,
+  `Street` VARCHAR(100) DEFAULT NULL,
+  `Village` VARCHAR(100) DEFAULT NULL,
+  `Town` VARCHAR(100) DEFAULT NULL, 
+  `District` VARCHAR(100) DEFAULT NULL,
+  `State` VARCHAR(100) DEFAULT NULL,
+  `Country` VARCHAR(100) DEFAULT 'Uganda',
+  `PhotoPath` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`AdmissionNo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: Parents
+CREATE TABLE `parents` (
+  `ParentId` INT NOT NULL,
+  `AdmissionNo` INT NOT NULL,
+  `father_name` varchar(255) NOT NULL, 
+  `father_age` INT DEFAULT NULL,
+  `father_contact` varchar(50) DEFAULT NULL,
+  `father_email` VARCHAR(150) DEFAULT NULL,
+  `father_occupation` varchar(100) DEFAULT NULL,
+  `father_education` varchar(100) DEFAULT NULL,
+  `mother_name` varchar(255) NOT NULL,
+  `mother_age` INT DEFAULT NULL,
+  `mother_contact` varchar(50) DEFAULT NULL,
+  `mother_email` VARCHAR(150) DEFAULT NULL,
+  `mother_occupation` varchar(100) DEFAULT NULL,
+  `mother_education` varchar(100) DEFAULT NULL,
+  `guardian_name` varchar(255) DEFAULT NULL,
+  `guardian_relation` ENUM('Brother','Sister','Uncle','Aunt','Grandparent','Other') DEFAULT NULL,
+  `guardian_age` INT DEFAULT NULL,
+  `guardian_contact` varchar(50) DEFAULT NULL,
+  `guardian_email` VARCHAR(150) DEFAULT NULL,
+  `guardian_occupation` varchar(100) DEFAULT NULL,
+  `guardian_education` varchar(100) DEFAULT NULL,
+  `guardian_address` text DEFAULT NULL,
+  `MoreInformation` text DEFAULT NULL,
+  PRIMARY KEY (`ParentId`),
+  UNIQUE KEY `Unique_Student_Parent` (`AdmissionNo`),
+  CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: Enrollment
+CREATE TABLE `enrollment` (
+  `EnrollmentID` INT NOT NULL,
+  `AdmissionNo` INT NOT NULL,
+  `AcademicYear` VARCHAR(20) NOT NULL,
+  `Level` varchar(50) NOT NULL,
+  `Class` varchar(50) NOT NULL,
+  `Term` varchar(50) NOT NULL,
+  `Stream` varchar(50) DEFAULT NULL,
+  `Residence` varchar(50) NOT NULL,
+  `EntryStatus` varchar(50) NOT NULL,
+  PRIMARY KEY (`EnrollmentID`),
+  UNIQUE KEY `Unique_Student_Enrollment` (`AdmissionNo`),
+  CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: AcademicHistory
+CREATE TABLE `academichistory` (
+  `HistoryID` INT NOT NULL,
+  `AdmissionNo` INT NOT NULL,
+  `FormerSchool` varchar(255) DEFAULT NULL,
+  `PLEIndexNumber` varchar(50) DEFAULT NULL,
+  `PLEAggregate` INT DEFAULT NULL,
+  `UCEIndexNumber` varchar(50) DEFAULT NULL,
+  `UCEResult` text DEFAULT NULL,
+  PRIMARY KEY (`HistoryID`),
+  UNIQUE KEY `Unique_Student_History` (`AdmissionNo`),
+  CONSTRAINT `academichistory_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: EnrollmentHistory
+CREATE TABLE `enrollmenthistory` (
+  `EnrollmentHistoryID` INT NOT NULL AUTO_INCREMENT,
+  `AdmissionNo` INT NOT NULL,
+  `AcademicYear` VARCHAR(20) NOT NULL,
+  `Level` varchar(50) NOT NULL,
+  `Class` varchar(50) NOT NULL,
+  `Term` varchar(50) NOT NULL,
+  `Stream` varchar(50) DEFAULT NULL,
+  `Residence` varchar(50) NOT NULL,
+  `EntryStatus` varchar(50) NOT NULL,
+  `DateMoved` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`EnrollmentHistoryID`),
+  KEY `AdmissionNo` (`AdmissionNo`),
+  CONSTRAINT `enrollmenthistory_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- TRIGGERS (Fixed to use AdmissionNo)
+DELIMITER //
+CREATE TRIGGER `sync_parents_id` BEFORE INSERT ON `parents`
+FOR EACH ROW BEGIN SET NEW.ParentId = NEW.AdmissionNo; END//
+
+CREATE TRIGGER `sync_enrollment_id` BEFORE INSERT ON `enrollment`
+FOR EACH ROW BEGIN SET NEW.EnrollmentID = NEW.AdmissionNo; END//
+
+CREATE TRIGGER `sync_academichistory_id` BEFORE INSERT ON `academichistory`
+FOR EACH ROW BEGIN SET NEW.HistoryID = NEW.AdmissionNo; END//
+DELIMITER ;
+
+-- =========================================================================
+-- 2. RANDOMIZED DATA GENERATOR
+-- =========================================================================
 DELIMITER $$
 
--- Drop previous version to avoid conflicts
 DROP PROCEDURE IF EXISTS `GenerateStrictUgandanData`$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateStrictUgandanData`()
 BEGIN
-    -- =========================================================================
-    -- 1. VARIABLE DECLARATION
-    -- =========================================================================
-    
-    -- Counters
+    -- Declarations
+    DECLARE done INT DEFAULT FALSE;
     DECLARE c_idx INT DEFAULT 1;
     DECLARE s_idx INT DEFAULT 1;
     DECLARE stu_idx INT DEFAULT 1;
     
-    -- Student Data
-    DECLARE v_student_id INT;
-    DECLARE v_class VARCHAR(10);
-    DECLARE v_level VARCHAR(20);
-    DECLARE v_stream VARCHAR(1);
+    -- Slot Variables (For random fetching)
+    DECLARE c_level VARCHAR(20);
+    DECLARE c_class VARCHAR(10);
+    DECLARE c_stream VARCHAR(1);
+    
+    -- Data Variables
+    DECLARE v_admission_no INT;
     DECLARE v_gender VARCHAR(10);
     DECLARE v_surname VARCHAR(50);
     DECLARE v_name VARCHAR(50);
     DECLARE v_dob DATE;
     DECLARE v_photo VARCHAR(255);
-
-    -- Address Variables
+    
+    -- Address
     DECLARE v_houseNo VARCHAR(50);
     DECLARE v_street VARCHAR(100);
     DECLARE v_village VARCHAR(100);
@@ -34,7 +160,7 @@ BEGIN
     DECLARE v_state VARCHAR(100);
     DECLARE v_country VARCHAR(100) DEFAULT 'Uganda';
     
-    -- Parent Data
+    -- Parents
     DECLARE v_father_name VARCHAR(100);
     DECLARE v_father_contact VARCHAR(20);
     DECLARE v_father_email VARCHAR(150);
@@ -49,7 +175,7 @@ BEGIN
     DECLARE v_mother_occ VARCHAR(50);
     DECLARE v_mother_edu VARCHAR(50);
     
-    -- Guardian Data
+    -- Guardian
     DECLARE v_guardian_name VARCHAR(100);
     DECLARE v_guardian_contact VARCHAR(20);
     DECLARE v_guardian_email VARCHAR(150);
@@ -59,14 +185,14 @@ BEGIN
     DECLARE v_guardian_edu VARCHAR(50);
     DECLARE v_guardian_addr TEXT;
     
-    -- Academic & Enrollment
+    -- Academic
     DECLARE v_former_school VARCHAR(100);
     DECLARE v_ple_idx VARCHAR(50);
     DECLARE v_ple_agg INT;
     DECLARE v_uce_idx VARCHAR(50);
     DECLARE v_uce_res VARCHAR(20);
     
-    -- Fixed/Calculated Fields
+    -- Config
     DECLARE v_adm_year INT DEFAULT 2025;
     DECLARE v_academic_year VARCHAR(20);
     DECLARE v_term VARCHAR(20);
@@ -74,166 +200,157 @@ BEGIN
     DECLARE v_entry_status VARCHAR(20);
     DECLARE v_more_info TEXT;
 
-    -- Set Academic Year String (2025 -> 2025-26)
+    -- Cursor to fetch slots RANDOMLY
+    DECLARE slot_cursor CURSOR FOR 
+        SELECT Level, Class, Stream FROM TempGenerationSlots ORDER BY RAND();
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
     SET v_academic_year = CONCAT(v_adm_year, '-', SUBSTRING(v_adm_year + 1, 3, 2));
 
-    -- =========================================================================
-    -- 2. GENERATION LOGIC
-    -- =========================================================================
-    
-    -- LOOP CLASSES (PP1 to S6 = 16 Classes)
+    -- -----------------------------------------------------
+    -- STEP A: BUILD CAPACITY (Create slots in temp table)
+    -- -----------------------------------------------------
+    DROP TEMPORARY TABLE IF EXISTS TempGenerationSlots;
+    CREATE TEMPORARY TABLE TempGenerationSlots (
+        Level VARCHAR(20),
+        Class VARCHAR(10),
+        Stream VARCHAR(1)
+    );
+
     SET c_idx = 1;
     WHILE c_idx <= 16 DO
-        
         -- Map Index to Class/Level
-        IF c_idx = 1 THEN SET v_class = 'PP.1'; SET v_level = 'Pre-Primary';
-        ELSEIF c_idx = 2 THEN SET v_class = 'PP.2'; SET v_level = 'Pre-Primary';
-        ELSEIF c_idx = 3 THEN SET v_class = 'PP.3'; SET v_level = 'Pre-Primary';
-        ELSEIF c_idx = 4 THEN SET v_class = 'P.1'; SET v_level = 'Primary';
-        ELSEIF c_idx = 5 THEN SET v_class = 'P.2'; SET v_level = 'Primary';
-        ELSEIF c_idx = 6 THEN SET v_class = 'P.3'; SET v_level = 'Primary';
-        ELSEIF c_idx = 7 THEN SET v_class = 'P.4'; SET v_level = 'Primary';
-        ELSEIF c_idx = 8 THEN SET v_class = 'P.5'; SET v_level = 'Primary';
-        ELSEIF c_idx = 9 THEN SET v_class = 'P.6'; SET v_level = 'Primary';
-        ELSEIF c_idx = 10 THEN SET v_class = 'P.7'; SET v_level = 'Primary';
-        ELSEIF c_idx = 11 THEN SET v_class = 'S.1'; SET v_level = 'Secondary';
-        ELSEIF c_idx = 12 THEN SET v_class = 'S.2'; SET v_level = 'Secondary';
-        ELSEIF c_idx = 13 THEN SET v_class = 'S.3'; SET v_level = 'Secondary';
-        ELSEIF c_idx = 14 THEN SET v_class = 'S.4'; SET v_level = 'Secondary';
-        ELSEIF c_idx = 15 THEN SET v_class = 'S.5'; SET v_level = 'Secondary';
-        ELSEIF c_idx = 16 THEN SET v_class = 'S.6'; SET v_level = 'Secondary';
+        IF c_idx = 1 THEN SET c_class = 'PP.1'; SET c_level = 'Pre-Primary';
+        ELSEIF c_idx = 2 THEN SET c_class = 'PP.2'; SET c_level = 'Pre-Primary';
+        ELSEIF c_idx = 3 THEN SET c_class = 'PP.3'; SET c_level = 'Pre-Primary';
+        ELSEIF c_idx = 4 THEN SET c_class = 'P.1'; SET c_level = 'Primary';
+        ELSEIF c_idx = 5 THEN SET c_class = 'P.2'; SET c_level = 'Primary';
+        ELSEIF c_idx = 6 THEN SET c_class = 'P.3'; SET c_level = 'Primary';
+        ELSEIF c_idx = 7 THEN SET c_class = 'P.4'; SET c_level = 'Primary';
+        ELSEIF c_idx = 8 THEN SET c_class = 'P.5'; SET c_level = 'Primary';
+        ELSEIF c_idx = 9 THEN SET c_class = 'P.6'; SET c_level = 'Primary';
+        ELSEIF c_idx = 10 THEN SET c_class = 'P.7'; SET c_level = 'Primary';
+        ELSEIF c_idx = 11 THEN SET c_class = 'S.1'; SET c_level = 'Secondary';
+        ELSEIF c_idx = 12 THEN SET c_class = 'S.2'; SET c_level = 'Secondary';
+        ELSEIF c_idx = 13 THEN SET c_class = 'S.3'; SET c_level = 'Secondary';
+        ELSEIF c_idx = 14 THEN SET c_class = 'S.4'; SET c_level = 'Secondary';
+        ELSEIF c_idx = 15 THEN SET c_class = 'S.5'; SET c_level = 'Secondary';
+        ELSEIF c_idx = 16 THEN SET c_class = 'S.6'; SET c_level = 'Secondary';
         END IF;
 
-        -- LOOP STREAMS (A-E)
         SET s_idx = 1;
         WHILE s_idx <= 5 DO
-            SET v_stream = ELT(s_idx, 'A', 'B', 'C', 'D', 'E');
-
-            -- LOOP STUDENTS (10 per stream)
+            SET c_stream = ELT(s_idx, 'A', 'B', 'C', 'D', 'E');
+            
+            -- Add 10 slots per stream
             SET stu_idx = 1;
             WHILE stu_idx <= 10 DO
-                
-                -- A. STUDENT IDENTITY
-                SET v_gender = IF(FLOOR(RAND()*2)=1, 'Male', 'Female');
-                SET v_surname = ELT(FLOOR(1 + (RAND() * 20)), 'Kato', 'Mukasa', 'Okello', 'Akello', 'Namukasa', 'Musoke', 'Mugabe', 'Kyomuhendo', 'Nalubega', 'Ochieng', 'Lwanga', 'Nantogo', 'Opio', 'Aine', 'Busingye', 'Ssemwogerere', 'Nakato', 'Waiswa', 'Byaruhanga', 'Tumusiime');
-                
-                IF v_gender = 'Male' THEN
-                    SET v_name = ELT(FLOOR(1 + (RAND() * 15)), 'John', 'David', 'Moses', 'Isaac', 'Brian', 'Joseph', 'Paul', 'Ivan', 'Samuel', 'Daniel', 'Solomon', 'Timothy', 'Mark', 'Andrew', 'Peter');
-                ELSE
-                    SET v_name = ELT(FLOOR(1 + (RAND() * 15)), 'Mary', 'Sarah', 'Grace', 'Joy', 'Pritah', 'Esther', 'Joan', 'Sandra', 'Ritah', 'Mercy', 'Doreen', 'Rebecca', 'Alice', 'Brenda', 'Winnie');
-                END IF;
-
-                SET v_dob = DATE_ADD('2005-01-01', INTERVAL FLOOR(RAND() * 1825) DAY);
-                
-                -- ADDRESS
-                SET v_houseNo = FLOOR(1 + (RAND() * 500));
-                SET v_street = ELT(FLOOR(1 + (RAND() * 6)), 'Main Street', 'Church Road', 'Market Lane', 'School Road', 'Hospital View', 'Central Avenue');
-                SET v_town = ELT(FLOOR(1 + (RAND() * 10)), 'Kampala', 'Gulu', 'Mbale', 'Jinja', 'Mbarara', 'Arua', 'Fort Portal', 'Masaka', 'Soroti', 'Lira');
-                SET v_village = CONCAT(v_town, ' ', ELT(FLOOR(1 + (RAND() * 5)), 'Central', 'North', 'East', 'West', 'South'));
-                SET v_district = v_town;
-                SET v_state = ELT(FLOOR(1 + (RAND() * 5)), 'Central Region', 'North Region', 'South Region', 'East Region', 'West Region');
-                SET v_photo = 'static/images/default_profile.png';
-
-                -- INSERT STUDENT
-                INSERT INTO students (
-                    AdmissionYear, Name, Surname, DateOfBirth, Gender, 
-                    HouseNo, Street, Village, Town, District, State, Country, PhotoPath
-                ) VALUES (
-                    v_adm_year, v_name, v_surname, v_dob, v_gender, 
-                    v_houseNo, v_street, v_village, v_town, v_district, v_state, v_country, v_photo
-                );
-                
-                SET v_student_id = LAST_INSERT_ID();
-
-                -- B. PARENT DETAILS
-                -- Father
-                SET v_father_name = CONCAT(ELT(FLOOR(1 + (RAND() * 15)), 'John', 'David', 'Moses', 'Isaac', 'Brian', 'Joseph', 'Paul', 'Ivan', 'Samuel', 'Daniel', 'Solomon', 'Timothy', 'Mark', 'Andrew', 'Peter'), ' ', v_surname);
-                SET v_father_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
-                SET v_father_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_father_name, ' ', 1)), ' ', ''), '.', LOWER(v_surname), FLOOR(RAND()*99), '@gmail.com');
-                SET v_father_age = FLOOR(30 + (RAND() * 40)); 
-                SET v_father_occ = ELT(FLOOR(1 + (RAND() * 9)), 'Teacher', 'Farmer', 'Doctor', 'Engineer', 'Driver', 'Shopkeeper', 'Civil Servant', 'Carpenter', 'Mechanic');
-                SET v_father_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
-                
-                -- Mother
-                SET v_mother_name = CONCAT(ELT(FLOOR(1 + (RAND() * 15)), 'Mary', 'Sarah', 'Grace', 'Joy', 'Pritah', 'Esther', 'Joan', 'Sandra', 'Ritah', 'Mercy', 'Doreen', 'Rebecca', 'Alice', 'Brenda', 'Winnie'), ' ', ELT(FLOOR(1 + (RAND() * 20)), 'Kato', 'Mukasa', 'Okello', 'Akello', 'Namukasa', 'Musoke', 'Mugabe', 'Kyomuhendo', 'Nalubega', 'Ochieng', 'Lwanga', 'Nantogo', 'Opio', 'Aine', 'Busingye', 'Ssemwogerere', 'Nakato', 'Waiswa', 'Byaruhanga', 'Tumusiime'));
-                SET v_mother_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
-                SET v_mother_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_mother_name, ' ', 1)), ' ', ''), '.', FLOOR(RAND()*999), '@gmail.com');
-                SET v_mother_age = FLOOR(28 + (RAND() * 37));
-                SET v_mother_occ = ELT(FLOOR(1 + (RAND() * 8)), 'Nurse', 'Farmer', 'Teacher', 'Tailor', 'Trader', 'Civil Servant', 'Housewife', 'Entrepreneur');
-                SET v_mother_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
-                
-                -- Guardian (30% chance)
-                IF RAND() < 0.3 THEN
-                    SET v_guardian_name = CONCAT(ELT(FLOOR(1 + (RAND() * 10)), 'James', 'Charles', 'Patrick', 'Robert', 'Susan', 'Hellen', 'Florence', 'Alice', 'Rose', 'Lillian'), ' ', v_surname);
-                    SET v_guardian_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
-                    SET v_guardian_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_guardian_name, ' ', 1)), ' ', ''), '.', FLOOR(RAND()*99), '@yahoo.com');
-                    SET v_guardian_rel = ELT(FLOOR(1 + (RAND() * 6)), 'Brother', 'Sister', 'Uncle', 'Aunt', 'Grandparent', 'Other');
-                    SET v_guardian_age = FLOOR(25 + (RAND() * 55));
-                    SET v_guardian_occ = ELT(FLOOR(1 + (RAND() * 9)), 'Teacher', 'Farmer', 'Doctor', 'Engineer', 'Driver', 'Shopkeeper', 'Civil Servant', 'Carpenter', 'Mechanic');
-                    SET v_guardian_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
-                    SET v_guardian_addr = CONCAT(v_houseNo, ' ', v_street, ', ', v_town, ', ', v_district);
-                ELSE
-                    SET v_guardian_name = NULL;
-                    SET v_guardian_contact = NULL;
-                    SET v_guardian_email = NULL;
-                    SET v_guardian_rel = NULL;
-                    SET v_guardian_age = NULL;
-                    SET v_guardian_occ = NULL;
-                    SET v_guardian_edu = NULL;
-                    SET v_guardian_addr = NULL;
-                END IF;
-
-                SET v_more_info = ELT(FLOOR(1 + (RAND() * 5)), 'Active in debate club', 'Prefect', 'Choir member', 'Football team', 'Science fair participant');
-                
-                -- INSERT PARENTS (Triggers will handle ParentId = StudentID)
-                INSERT INTO parents (
-                    StudentID, 
-                    father_name, father_age, father_contact, father_email, father_occupation, father_education, 
-                    mother_name, mother_age, mother_contact, mother_email, mother_occupation, mother_education, 
-                    guardian_name, guardian_relation, guardian_contact, guardian_email, guardian_age, guardian_occupation, guardian_education, guardian_address, 
-                    MoreInformation
-                ) VALUES (
-                    v_student_id, 
-                    v_father_name, v_father_age, v_father_contact, v_father_email, v_father_occ, v_father_edu, 
-                    v_mother_name, v_mother_age, v_mother_contact, v_mother_email, v_mother_occ, v_mother_edu, 
-                    v_guardian_name, v_guardian_rel, v_guardian_contact, v_guardian_email, v_guardian_age, v_guardian_occ, v_guardian_edu, v_guardian_addr, 
-                    v_more_info
-                );
-
-                -- C. ACADEMIC RECORDS
-                SET v_former_school = ELT(FLOOR(1 + (RAND() * 5)), 'Namilyango School', 'Gayaza High School', 'Ntare School', 'Buddo Junior', 'Greenhill Academy');
-                SET v_ple_idx = CONCAT('PLE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
-                SET v_ple_agg = FLOOR(4 + (RAND() * 32)); 
-                SET v_uce_idx = CONCAT('UCE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
-                SET v_uce_res = ELT(FLOOR(1 + (RAND() * 4)), 'Division I', 'Division II', 'Division III', 'Division IV');
-
-                -- (Triggers will handle HistoryID = StudentID)
-                INSERT INTO academichistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
-                VALUES (v_student_id, v_former_school, v_ple_idx, v_ple_agg, v_uce_idx, v_uce_res);
-
-                -- D. ENROLLMENT
-                SET v_term = ELT(FLOOR(1 + (RAND() * 3)), 'Term 1', 'Term 2', 'Term 3');
-                SET v_residence = IF(RAND() > 0.5, 'Boarding', 'Day');
-                SET v_entry_status = IF(v_class = 'P.1' OR v_class = 'S.1' OR v_class = 'PP.1', 'New', 'Continuing');
-
-                -- (Triggers will handle EnrollmentID = StudentID)
-                INSERT INTO enrollment (StudentID, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus)
-                VALUES (v_student_id, v_academic_year, v_level, v_class, v_term, v_stream, v_residence, v_entry_status);
-
+                INSERT INTO TempGenerationSlots VALUES (c_level, c_class, c_stream);
                 SET stu_idx = stu_idx + 1;
-            END WHILE; -- End Student Loop
-
+            END WHILE;
+            
             SET s_idx = s_idx + 1;
-        END WHILE; -- End Stream Loop
-
+        END WHILE;
         SET c_idx = c_idx + 1;
-    END WHILE; -- End Class Loop
+    END WHILE;
+
+    -- -----------------------------------------------------
+    -- STEP B: INSERT STUDENTS (Randomized Order)
+    -- -----------------------------------------------------
+    OPEN slot_cursor;
+    
+    read_loop: LOOP
+        FETCH slot_cursor INTO c_level, c_class, c_stream;
+        IF done THEN LEAVE read_loop; END IF;
+
+        -- 1. Student Info
+        SET v_gender = IF(FLOOR(RAND()*2)=1, 'Male', 'Female');
+        SET v_surname = ELT(FLOOR(1 + (RAND() * 20)), 'Kato', 'Mukasa', 'Okello', 'Akello', 'Namukasa', 'Musoke', 'Mugabe', 'Kyomuhendo', 'Nalubega', 'Ochieng', 'Lwanga', 'Nantogo', 'Opio', 'Aine', 'Busingye', 'Ssemwogerere', 'Nakato', 'Waiswa', 'Byaruhanga', 'Tumusiime');
+        
+        IF v_gender = 'Male' THEN
+            SET v_name = ELT(FLOOR(1 + (RAND() * 15)), 'John', 'David', 'Moses', 'Isaac', 'Brian', 'Joseph', 'Paul', 'Ivan', 'Samuel', 'Daniel', 'Solomon', 'Timothy', 'Mark', 'Andrew', 'Peter');
+        ELSE
+            SET v_name = ELT(FLOOR(1 + (RAND() * 15)), 'Mary', 'Sarah', 'Grace', 'Joy', 'Pritah', 'Esther', 'Joan', 'Sandra', 'Ritah', 'Mercy', 'Doreen', 'Rebecca', 'Alice', 'Brenda', 'Winnie');
+        END IF;
+
+        SET v_dob = DATE_ADD('2005-01-01', INTERVAL FLOOR(RAND() * 1825) DAY);
+        
+        -- Address
+        SET v_houseNo = FLOOR(1 + (RAND() * 500));
+        SET v_street = ELT(FLOOR(1 + (RAND() * 6)), 'Main Street', 'Church Road', 'Market Lane', 'School Road', 'Hospital View', 'Central Avenue');
+        SET v_town = ELT(FLOOR(1 + (RAND() * 10)), 'Kampala', 'Gulu', 'Mbale', 'Jinja', 'Mbarara', 'Arua', 'Fort Portal', 'Masaka', 'Soroti', 'Lira');
+        SET v_village = CONCAT(v_town, ' Central');
+        SET v_district = v_town;
+        SET v_state = 'Central Region';
+        SET v_photo = 'static/images/default_profile.png';
+
+        INSERT INTO students (AdmissionYear, Name, Surname, DateOfBirth, Gender, HouseNo, Street, Village, Town, District, State, Country, PhotoPath) 
+        VALUES (v_adm_year, v_name, v_surname, v_dob, v_gender, v_houseNo, v_street, v_village, v_town, v_district, v_state, v_country, v_photo);
+        
+        SET v_admission_no = LAST_INSERT_ID();
+
+        -- 2. Parents
+        SET v_father_name = CONCAT(ELT(FLOOR(1 + (RAND() * 15)), 'John', 'David', 'Moses', 'Isaac', 'Brian', 'Joseph', 'Paul', 'Ivan', 'Samuel', 'Daniel', 'Solomon', 'Timothy', 'Mark', 'Andrew', 'Peter'), ' ', v_surname);
+        SET v_father_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
+        SET v_father_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_father_name, ' ', 1)), ' ', ''), '.', LOWER(v_surname), FLOOR(RAND()*99), '@gmail.com');
+        SET v_father_age = FLOOR(30 + (RAND() * 40)); 
+        SET v_father_occ = ELT(FLOOR(1 + (RAND() * 9)), 'Teacher', 'Farmer', 'Doctor', 'Engineer', 'Driver', 'Shopkeeper', 'Civil Servant', 'Carpenter', 'Mechanic');
+        SET v_father_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
+        
+        SET v_mother_name = CONCAT(ELT(FLOOR(1 + (RAND() * 15)), 'Mary', 'Sarah', 'Grace', 'Joy', 'Pritah', 'Esther', 'Joan', 'Sandra', 'Ritah', 'Mercy', 'Doreen', 'Rebecca', 'Alice', 'Brenda', 'Winnie'), ' ', ELT(FLOOR(1 + (RAND() * 20)), 'Kato', 'Mukasa', 'Okello', 'Akello', 'Namukasa', 'Musoke', 'Mugabe', 'Kyomuhendo', 'Nalubega', 'Ochieng', 'Lwanga', 'Nantogo', 'Opio', 'Aine', 'Busingye', 'Ssemwogerere', 'Nakato', 'Waiswa', 'Byaruhanga', 'Tumusiime'));
+        SET v_mother_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
+        SET v_mother_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_mother_name, ' ', 1)), ' ', ''), '.', FLOOR(RAND()*999), '@gmail.com');
+        SET v_mother_age = FLOOR(28 + (RAND() * 37));
+        SET v_mother_occ = ELT(FLOOR(1 + (RAND() * 8)), 'Nurse', 'Farmer', 'Teacher', 'Tailor', 'Trader', 'Civil Servant', 'Housewife', 'Entrepreneur');
+        SET v_mother_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
+        
+        -- 3. Guardian
+        IF RAND() < 0.3 THEN
+            SET v_guardian_name = CONCAT(ELT(FLOOR(1 + (RAND() * 10)), 'James', 'Charles', 'Patrick', 'Robert', 'Susan', 'Hellen', 'Florence', 'Alice', 'Rose', 'Lillian'), ' ', v_surname);
+            SET v_guardian_contact = CONCAT('+2567', ELT(FLOOR(1 + (RAND() * 4)), '7', '0', '5', '8'), FLOOR(1000000 + (RAND() * 8999999)));
+            SET v_guardian_email = CONCAT(REPLACE(LOWER(SUBSTRING_INDEX(v_guardian_name, ' ', 1)), ' ', ''), '.', FLOOR(RAND()*99), '@yahoo.com');
+            SET v_guardian_rel = ELT(FLOOR(1 + (RAND() * 6)), 'Brother', 'Sister', 'Uncle', 'Aunt', 'Grandparent', 'Other');
+            SET v_guardian_age = FLOOR(25 + (RAND() * 55));
+            SET v_guardian_occ = ELT(FLOOR(1 + (RAND() * 9)), 'Teacher', 'Farmer', 'Doctor', 'Engineer', 'Driver', 'Shopkeeper', 'Civil Servant', 'Carpenter', 'Mechanic');
+            SET v_guardian_edu = ELT(FLOOR(1 + (RAND() * 5)), 'Primary', 'Secondary', 'Diploma', 'Bachelor’s Degree', 'Master’s Degree');
+            SET v_guardian_addr = CONCAT(v_houseNo, ' ', v_street, ', ', v_town, ', ', v_district);
+        ELSE
+            SET v_guardian_name = NULL; SET v_guardian_contact = NULL; SET v_guardian_email = NULL; SET v_guardian_rel = NULL; SET v_guardian_age = NULL; SET v_guardian_occ = NULL; SET v_guardian_edu = NULL; SET v_guardian_addr = NULL;
+        END IF;
+
+        SET v_more_info = ELT(FLOOR(1 + (RAND() * 5)), 'Active in debate club', 'Prefect', 'Choir member', 'Football team', 'Science fair participant');
+
+        INSERT INTO parents (AdmissionNo, father_name, father_age, father_contact, father_email, father_occupation, father_education, mother_name, mother_age, mother_contact, mother_email, mother_occupation, mother_education, guardian_name, guardian_relation, guardian_contact, guardian_email, guardian_age, guardian_occupation, guardian_education, guardian_address, MoreInformation) 
+        VALUES (v_admission_no, v_father_name, v_father_age, v_father_contact, v_father_email, v_father_occ, v_father_edu, v_mother_name, v_mother_age, v_mother_contact, v_mother_email, v_mother_occ, v_mother_edu, v_guardian_name, v_guardian_rel, v_guardian_contact, v_guardian_email, v_guardian_age, v_guardian_occ, v_guardian_edu, v_guardian_addr, v_more_info);
+
+        -- 4. Academic History
+        SET v_former_school = ELT(FLOOR(1 + (RAND() * 5)), 'Namilyango School', 'Gayaza High School', 'Ntare School', 'Buddo Junior', 'Greenhill Academy');
+        SET v_ple_idx = CONCAT('PLE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
+        SET v_ple_agg = FLOOR(4 + (RAND() * 32)); 
+        SET v_uce_idx = CONCAT('UCE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
+        SET v_uce_res = ELT(FLOOR(1 + (RAND() * 4)), 'Division I', 'Division II', 'Division III', 'Division IV');
+
+        INSERT INTO academichistory (AdmissionNo, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
+        VALUES (v_admission_no, v_former_school, v_ple_idx, v_ple_agg, v_uce_idx, v_uce_res);
+
+        -- 5. Enrollment (Using Random Slots)
+        SET v_term = ELT(FLOOR(1 + (RAND() * 3)), 'Term 1', 'Term 2', 'Term 3');
+        SET v_residence = IF(RAND() > 0.5, 'Boarding', 'Day');
+        SET v_entry_status = IF(c_class = 'P.1' OR c_class = 'S.1' OR c_class = 'PP.1', 'New', 'Continuing');
+
+        INSERT INTO enrollment (AdmissionNo, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus)
+        VALUES (v_admission_no, v_academic_year, c_level, c_class, v_term, c_stream, v_residence, v_entry_status);
+        
+    END LOOP;
+
+   
 
 END$$
 
 DELIMITER ;
 
 -- =============================================================================
--- 3. EXECUTE THE GENERATOR
+-- 3. EXECUTE THE GENERATOR (Populate Data Now)
 -- =============================================================================
 CALL GenerateStrictUgandanData();

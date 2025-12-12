@@ -3,9 +3,9 @@
 require_once __DIR__ . '/../../config/config.php';
 header('Content-Type: application/json');
 
-$student_id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+$Ad_no = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 
-if (!$student_id) {
+if (!$Ad_no) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Student ID is required']);
     exit;
@@ -17,7 +17,7 @@ if ($conn) {
     // Select ALL fields for parents and guardian
     $sql = "
         SELECT 
-            S.StudentID, S.AdmissionYear, S.Name, S.Surname, S.DateOfBirth, S.Gender, S.CurrentAddress AS Address, S.PhotoPath,
+            S.AdmissionNo, S.AdmissionYear, S.Name, S.Surname, S.DateOfBirth, S.Gender, S.CurrentAddress AS Address, S.PhotoPath,
             
             -- Father Details
             P.father_name, P.father_age, P.father_contact, P.father_occupation, P.father_education,
@@ -39,15 +39,15 @@ if ($conn) {
             A.FormerSchool, A.PLEIndexNumber, A.PLEAggregate, A.UCEIndexNumber, A.UCEResult,
             E.Class, E.Level, E.Term, E.AcademicYear, E.Residence, E.EntryStatus, E.Stream
         FROM Students S
-        JOIN Enrollment E ON S.StudentID = E.StudentID
-        LEFT JOIN Parents P ON S.StudentID = P.StudentID        
-        LEFT JOIN AcademicHistory A ON S.StudentID = A.StudentID 
-        WHERE S.StudentID = ?
+        JOIN Enrollment E ON S.AdmissionNo = E.AdmissionNo
+        LEFT JOIN Parents P ON S.AdmissionNo = P.AdmissionNo        
+        LEFT JOIN AcademicHistory A ON S.AdmissionNo = A.AdmissionNo 
+        WHERE S.AdmissionNo = ?
     ";
     
     $stmt = $conn->prepare($sql);
     if ($stmt) {
-        $stmt->bind_param("i", $student_id);
+        $stmt->bind_param("i", $Ad_no);
         $stmt->execute();
         $result = $stmt->get_result();
         $data = $result->fetch_assoc();

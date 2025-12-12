@@ -178,7 +178,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateDetailedStudentData` ()   B
 
                 -- INSERT PARENTS
                 INSERT INTO parents (
-                    StudentID, 
+                    AdmissionNo, 
                     father_name, father_age, father_contact, father_occupation, father_education,
                     mother_name, mother_age, mother_contact, mother_occupation, mother_education,
                     guardian_name, guardian_relation, guardian_contact, guardian_age, guardian_occupation, guardian_address,
@@ -210,7 +210,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateDetailedStudentData` ()   B
                     SET v_uce_res = NULL;
                 END IF;
 
-                INSERT INTO academichistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
+                INSERT INTO academichistory (AdmissionNo, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
                 VALUES (v_student_id, v_former_school, v_ple_idx, v_ple_agg, v_uce_idx, v_uce_res);
 
                 -- --- ENROLLMENT ---
@@ -219,7 +219,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateDetailedStudentData` ()   B
                 SET v_residence = IF(RAND() > 0.5, 'Boarding', 'Day');
                 SET v_entry_status = IF(RAND() > 0.5, 'New', 'Continuing');
 
-                INSERT INTO enrollment (StudentID, RegistrationYear, Level, Class, Term, Stream, Residence, EntryStatus)
+                INSERT INTO enrollment (AdmissionNo, RegistrationYear, Level, Class, Term, Stream, Residence, EntryStatus)
                 VALUES (v_student_id, v_reg_year, v_level, v_class, v_term, v_stream, v_residence, v_entry_status);
 
                 SET stu_idx = stu_idx + 1;
@@ -325,7 +325,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateRandomStudentData` ()   BEG
 
                 -- INSERT INTO parents Table
                 INSERT INTO parents (
-                    StudentID, 
+                    AdmissionNo, 
                     father_name, father_age, father_contact, father_occupation, father_education,
                     mother_name, mother_age, mother_contact, mother_occupation, mother_education,
                     guardian_name, guardian_relation, guardian_contact, guardian_occupation, guardian_address, MoreInformation
@@ -362,7 +362,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateRandomStudentData` ()   BEG
                 END IF;
 
                 -- INSERT INTO academichistory Table
-                INSERT INTO academichistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
+                INSERT INTO academichistory (AdmissionNo, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
                 VALUES (
                     v_student_id,
                     ELT(FLOOR(1 + (RAND() * 5)), 'Buddo Junior', 'Kampala Parents', 'Greenhill Academy', 'City Parents', 'Hillside Primary'),
@@ -371,7 +371,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateRandomStudentData` ()   BEG
 
                 -- D. Generate Enrollment Record
                 -- INSERT INTO enrollment Table
-                INSERT INTO enrollment (StudentID, RegistrationYear, Level, Class, Term, Stream, Residence, EntryStatus)
+                INSERT INTO enrollment (AdmissionNo, RegistrationYear, Level, Class, Term, Stream, Residence, EntryStatus)
                 VALUES (
                     v_student_id,
                     2025,
@@ -549,7 +549,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateStrictStudentData` ()   BEG
 
                 -- INSERT INTO parents
                 INSERT INTO parents (
-                    StudentID, 
+                    AdmissionNo, 
                     father_name, father_age, father_contact, father_occupation, father_education,
                     mother_name, mother_age, mother_contact, mother_occupation, mother_education,
                     guardian_name, guardian_relation, guardian_contact, guardian_age, guardian_occupation, guardian_education, guardian_address,
@@ -583,7 +583,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateStrictStudentData` ()   BEG
                     SET v_uce_res = NULL;
                 END IF;
 
-                INSERT INTO academichistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
+                INSERT INTO academichistory (AdmissionNo, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
                 VALUES (v_student_id, v_former_school, v_ple_idx, v_ple_agg, v_uce_idx, v_uce_res);
 
                 -- E. ENROLLMENT (Strict Allocation)
@@ -592,7 +592,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateStrictStudentData` ()   BEG
                 SET v_residence = IF(RAND() > 0.5, 'Boarding', 'Day');
                 SET v_entry_status = IF(RAND() > 0.5, 'New', 'Continuing');
 
-                INSERT INTO enrollment (StudentID, RegistrationYear, Level, Class, Term, Stream, Residence, EntryStatus)
+                INSERT INTO enrollment (AdmissionNo, RegistrationYear, Level, Class, Term, Stream, Residence, EntryStatus)
                 VALUES (v_student_id, v_reg_year, v_level, v_class, v_term, v_stream, v_residence, v_entry_status);
 
                 SET stu_idx = stu_idx + 1;
@@ -801,7 +801,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateStrictUgandanData` ()   BEG
                 
                 -- INSERT PARENTS (Updated with Emails)
                 INSERT INTO parents (
-                    StudentID, 
+                    AdmissionNo, 
                     father_name, father_age, father_contact, father_email, father_occupation, father_education,
                     mother_name, mother_age, mother_contact, mother_email, mother_occupation, mother_education,
                     guardian_name, guardian_relation, guardian_contact, guardian_email, guardian_age, guardian_occupation, guardian_education, guardian_address,
@@ -823,7 +823,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateStrictUgandanData` ()   BEG
                 SET v_uce_idx = CONCAT('UCE/UG/20', FLOOR(10 + (RAND() * 14)), '/', LPAD(FLOOR(RAND() * 100000), 5, '0'));
                 SET v_uce_res = ELT(FLOOR(1 + (RAND() * 4)), 'Division I', 'Division II', 'Division III', 'Division IV');
 
-                INSERT INTO academichistory (StudentID, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
+                INSERT INTO academichistory (AdmissionNo, FormerSchool, PLEIndexNumber, PLEAggregate, UCEIndexNumber, UCEResult)
                 VALUES (v_student_id, v_former_school, v_ple_idx, v_ple_agg, v_uce_idx, v_uce_res);
 
                 -- E. ENROLLMENT [cite: 66]
@@ -831,7 +831,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateStrictUgandanData` ()   BEG
                 SET v_residence = IF(RAND() > 0.5, 'Boarding', 'Day');
                 SET v_entry_status = IF(v_class = 'P.1' OR v_class = 'S.1' OR v_class = 'PP.1', 'New', 'Continuing');
 
-                INSERT INTO enrollment (StudentID, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus)
+                INSERT INTO enrollment (AdmissionNo, AcademicYear, Level, Class, Term, Stream, Residence, EntryStatus)
                 VALUES (v_student_id, v_academic_year, v_level, v_class, v_term, v_stream, v_residence, v_entry_status);
 
                 SET stu_idx = stu_idx + 1;
@@ -855,7 +855,7 @@ DELIMITER ;
 
 CREATE TABLE `academichistory` (
   `HistoryID` int(11) NOT NULL,
-  `StudentID` int(11) NOT NULL,
+  `AdmissionNo` int(11) NOT NULL,
   `FormerSchool` varchar(255) DEFAULT NULL,
   `PLEIndexNumber` varchar(50) DEFAULT NULL,
   `PLEAggregate` int(11) DEFAULT NULL,
@@ -867,7 +867,7 @@ CREATE TABLE `academichistory` (
 -- Dumping data for table `academichistory`
 --
 
-INSERT INTO `academichistory` (`HistoryID`, `StudentID`, `FormerSchool`, `PLEIndexNumber`, `PLEAggregate`, `UCEIndexNumber`, `UCEResult`) VALUES
+INSERT INTO `academichistory` (`HistoryID`, `AdmissionNo`, `FormerSchool`, `PLEIndexNumber`, `PLEAggregate`, `UCEIndexNumber`, `UCEResult`) VALUES
 (1, 1, 'Ntare School', 'PLE/UG/2018/61395', 8, 'UCE/UG/2022/02605', 'Division II'),
 (2, 2, 'Greenhill Academy', 'PLE/UG/2020/28304', 6, 'UCE/UG/2017/35801', 'Division I'),
 (3, 3, 'Greenhill Academy', 'PLE/UG/2017/81723', 22, 'UCE/UG/2016/60307', 'Division III'),
@@ -1423,7 +1423,7 @@ INSERT INTO `academichistory` (`HistoryID`, `StudentID`, `FormerSchool`, `PLEInd
 (553, 553, 'Buddo Junior', 'PLE/UG/2016/47303', 35, 'UCE/UG/2017/59504', 'Division II'),
 (554, 554, 'Namilyango School', 'PLE/UG/2018/54543', 4, 'UCE/UG/2015/99595', 'Division IV'),
 (555, 555, 'Namilyango School', 'PLE/UG/2017/29083', 29, 'UCE/UG/2011/04162', 'Division IV');
-INSERT INTO `academichistory` (`HistoryID`, `StudentID`, `FormerSchool`, `PLEIndexNumber`, `PLEAggregate`, `UCEIndexNumber`, `UCEResult`) VALUES
+INSERT INTO `academichistory` (`HistoryID`, `AdmissionNo`, `FormerSchool`, `PLEIndexNumber`, `PLEAggregate`, `UCEIndexNumber`, `UCEResult`) VALUES
 (556, 556, 'Gayaza High School', 'PLE/UG/2022/42773', 19, 'UCE/UG/2012/49414', 'Division IV'),
 (557, 557, 'Namilyango School', 'PLE/UG/2020/64008', 34, 'UCE/UG/2020/03121', 'Division IV'),
 (558, 558, 'Greenhill Academy', 'PLE/UG/2016/49539', 7, 'UCE/UG/2010/92446', 'Division II'),
@@ -1681,7 +1681,7 @@ INSERT INTO `academichistory` (`HistoryID`, `StudentID`, `FormerSchool`, `PLEInd
 
 CREATE TABLE `enrollment` (
   `EnrollmentID` int(11) NOT NULL,
-  `StudentID` int(11) NOT NULL,
+  `AdmissionNo` int(11) NOT NULL,
   `AcademicYear` varchar(20) NOT NULL,
   `Level` varchar(50) NOT NULL,
   `Class` varchar(50) NOT NULL,
@@ -1695,7 +1695,7 @@ CREATE TABLE `enrollment` (
 -- Dumping data for table `enrollment`
 --
 
-INSERT INTO `enrollment` (`EnrollmentID`, `StudentID`, `AcademicYear`, `Level`, `Class`, `Term`, `Stream`, `Residence`, `EntryStatus`) VALUES
+INSERT INTO `enrollment` (`EnrollmentID`, `AdmissionNo`, `AcademicYear`, `Level`, `Class`, `Term`, `Stream`, `Residence`, `EntryStatus`) VALUES
 (1, 1, '2025-26', 'Pre-Primary', 'PP.1', 'Term 1', 'A', 'Boarding', 'New'),
 (2, 2, '2025-26', 'Pre-Primary', 'PP.1', 'Term 1', 'A', 'Boarding', 'New'),
 (3, 3, '2025-26', 'Pre-Primary', 'PP.1', 'Term 1', 'A', 'Day', 'New'),
@@ -2341,7 +2341,7 @@ INSERT INTO `enrollment` (`EnrollmentID`, `StudentID`, `AcademicYear`, `Level`, 
 (643, 643, '2025-26', 'Secondary', 'S.3', 'Term 2', 'E', 'Day', 'Continuing'),
 (644, 644, '2025-26', 'Secondary', 'S.3', 'Term 3', 'E', 'Day', 'Continuing'),
 (645, 645, '2025-26', 'Secondary', 'S.3', 'Term 2', 'E', 'Day', 'Continuing');
-INSERT INTO `enrollment` (`EnrollmentID`, `StudentID`, `AcademicYear`, `Level`, `Class`, `Term`, `Stream`, `Residence`, `EntryStatus`) VALUES
+INSERT INTO `enrollment` (`EnrollmentID`, `AdmissionNo`, `AcademicYear`, `Level`, `Class`, `Term`, `Stream`, `Residence`, `EntryStatus`) VALUES
 (646, 646, '2025-26', 'Secondary', 'S.3', 'Term 1', 'E', 'Boarding', 'Continuing'),
 (647, 647, '2025-26', 'Secondary', 'S.3', 'Term 3', 'E', 'Day', 'Continuing'),
 (648, 648, '2025-26', 'Secondary', 'S.3', 'Term 3', 'E', 'Day', 'Continuing'),
@@ -2509,7 +2509,7 @@ INSERT INTO `enrollment` (`EnrollmentID`, `StudentID`, `AcademicYear`, `Level`, 
 
 CREATE TABLE `enrollmenthistory` (
   `HistoryID` int(11) NOT NULL,
-  `StudentID` int(11) NOT NULL,
+  `AdmissionNo` int(11) NOT NULL,
   `AcademicYear` varchar(20) NOT NULL,
   `Level` varchar(50) NOT NULL,
   `Class` varchar(50) NOT NULL,
@@ -2528,7 +2528,7 @@ CREATE TABLE `enrollmenthistory` (
 
 CREATE TABLE `parents` (
   `ParentId` int(11) NOT NULL,
-  `StudentID` int(11) NOT NULL,
+  `AdmissionNo` int(11) NOT NULL,
   `father_name` varchar(255) NOT NULL,
   `father_age` int(11) DEFAULT NULL,
   `father_contact` varchar(50) DEFAULT NULL,
@@ -2556,7 +2556,7 @@ CREATE TABLE `parents` (
 -- Dumping data for table `parents`
 --
 
-INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
+INSERT INTO `parents` (`ParentId`, `AdmissionNo`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
 (1, 1, 'Andrew Ochieng', 66, '+256788948221', 'andrew.ochieng70@gmail.com', 'Driver', 'Diploma', 'Joan Kyomuhendo', 62, '+256752101713', 'joan.657@gmail.com', 'Civil Servant', 'Diploma', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active in debate club'),
 (2, 2, 'Ivan Nantogo', 51, '+256757781279', 'ivan.nantogo75@gmail.com', 'Driver', 'Bachelor’s Degree', 'Doreen Aine', 36, '+256772522056', 'doreen.144@gmail.com', 'Civil Servant', 'Bachelor’s Degree', 'Hellen Nantogo', 'Grandparent', 44, '+256705971104', 'hellen.47@yahoo.com', 'Driver', 'Diploma', '234 Market Lane, Lira, Lira', 'Science fair participant'),
 (3, 3, 'Isaac Ssemwogerere', 63, '+256782049326', 'isaac.ssemwogerere23@gmail.com', 'Driver', 'Master’s Degree', 'Sandra Kyomuhendo', 41, '+256709349270', 'sandra.426@gmail.com', 'Tailor', 'Secondary', 'Susan Ssemwogerere', 'Other', 28, '+256704276983', 'susan.78@yahoo.com', 'Civil Servant', 'Primary', '497 Main Street, Arua, Arua', 'Football team'),
@@ -2732,7 +2732,7 @@ INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `fa
 (173, 173, 'Daniel Byaruhanga', 46, '+256709560579', 'daniel.byaruhanga64@gmail.com', 'Farmer', 'Secondary', 'Pritah Lwanga', 61, '+256784222207', 'pritah.395@gmail.com', 'Teacher', 'Primary', 'Patrick Byaruhanga', 'Uncle', 52, '+256774617287', 'patrick.92@yahoo.com', 'Teacher', 'Primary', '123 Church Road, Lira, Lira', 'Science fair participant'),
 (174, 174, 'Brian Tumusiime', 64, '+256754586943', 'brian.tumusiime1@gmail.com', 'Doctor', 'Master’s Degree', 'Alice Akello', 48, '+256751598950', 'alice.750@gmail.com', 'Trader', 'Master’s Degree', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Science fair participant'),
 (175, 175, 'Joseph Lwanga', 57, '+256789384844', 'joseph.lwanga69@gmail.com', 'Engineer', 'Bachelor’s Degree', 'Mercy Mukasa', 32, '+256705127591', 'mercy.301@gmail.com', 'Housewife', 'Secondary', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Prefect');
-INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
+INSERT INTO `parents` (`ParentId`, `AdmissionNo`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
 (176, 176, 'Ivan Ssemwogerere', 37, '+256759898957', 'ivan.ssemwogerere42@gmail.com', 'Shopkeeper', 'Diploma', 'Alice Nalubega', 41, '+256754907616', 'alice.932@gmail.com', 'Nurse', 'Primary', 'Alice Ssemwogerere', 'Uncle', 32, '+256702148559', 'alice.76@yahoo.com', 'Farmer', 'Bachelor’s Degree', '362 Central Avenue, Fort Portal, Fort Portal', 'Football team'),
 (177, 177, 'Brian Opio', 33, '+256756604157', 'brian.opio58@gmail.com', 'Shopkeeper', 'Master’s Degree', 'Doreen Nakato', 38, '+256782226136', 'doreen.935@gmail.com', 'Trader', 'Master’s Degree', 'Lillian Opio', 'Aunt', 32, '+256707288028', 'lillian.52@yahoo.com', 'Teacher', 'Master’s Degree', '498 Market Lane, Jinja, Jinja', 'Prefect'),
 (178, 178, 'Daniel Nakato', 60, '+256776975411', 'daniel.nakato94@gmail.com', 'Mechanic', 'Bachelor’s Degree', 'Esther Ssemwogerere', 51, '+256781855607', 'esther.784@gmail.com', 'Housewife', 'Secondary', 'Robert Nakato', 'Other', 62, '+256752069179', 'robert.65@yahoo.com', 'Shopkeeper', 'Master’s Degree', '278 Market Lane, Jinja, Jinja', 'Football team'),
@@ -2906,7 +2906,7 @@ INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `fa
 (346, 346, 'Brian Okello', 48, '+256773889967', 'brian.okello87@gmail.com', 'Shopkeeper', 'Master’s Degree', 'Sandra Nakato', 41, '+256757550524', 'sandra.707@gmail.com', 'Civil Servant', 'Secondary', 'Rose Okello', 'Father', 39, '+256785461984', 'rose.12@yahoo.com', 'Mechanic', 'Master’s Degree', '11 Main Street, Kampala, Kampala', 'Football team'),
 (347, 347, 'Isaac Waiswa', 46, '+256755875717', 'isaac.waiswa79@gmail.com', 'Shopkeeper', 'Master’s Degree', 'Alice Akello', 32, '+256753314050', 'alice.576@gmail.com', 'Housewife', 'Master’s Degree', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Football team'),
 (348, 348, 'Ivan Byaruhanga', 44, '+256775687287', 'ivan.byaruhanga97@gmail.com', 'Mechanic', 'Diploma', 'Pritah Nalubega', 42, '+256772469657', 'pritah.574@gmail.com', 'Farmer', 'Master’s Degree', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Science fair participant');
-INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
+INSERT INTO `parents` (`ParentId`, `AdmissionNo`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
 (349, 349, 'Brian Kyomuhendo', 33, '+256701427634', 'brian.kyomuhendo4@gmail.com', 'Doctor', 'Primary', 'Doreen Mukasa', 52, '+256705892004', 'doreen.658@gmail.com', 'Teacher', 'Bachelor’s Degree', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active in debate club'),
 (350, 350, 'Joseph Akello', 37, '+256702671612', 'joseph.akello14@gmail.com', 'Driver', 'Primary', 'Joan Mugabe', 43, '+256779165486', 'joan.29@gmail.com', 'Nurse', 'Master’s Degree', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Choir member'),
 (351, 351, 'Mark Musoke', 56, '+256701612142', 'mark.musoke37@gmail.com', 'Farmer', 'Primary', 'Alice Ssemwogerere', 30, '+256709565113', 'alice.384@gmail.com', 'Farmer', 'Bachelor’s Degree', 'Rose Musoke', 'Father', 44, '+256707333409', 'rose.22@yahoo.com', 'Carpenter', 'Master’s Degree', '193 Central Avenue, Jinja, Jinja', 'Science fair participant'),
@@ -3079,7 +3079,7 @@ INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `fa
 (518, 518, 'Mark Nalubega', 54, '+256776313211', 'mark.nalubega27@gmail.com', 'Farmer', 'Primary', 'Winnie Nantogo', 36, '+256788254047', 'winnie.328@gmail.com', 'Farmer', 'Primary', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Science fair participant'),
 (519, 519, 'John Nalubega', 59, '+256774422150', 'john.nalubega56@gmail.com', 'Mechanic', 'Secondary', 'Grace Ssemwogerere', 42, '+256778657573', 'grace.587@gmail.com', 'Farmer', 'Bachelor’s Degree', 'Alice Nalubega', 'Other', 30, '+256771715864', 'alice.23@yahoo.com', 'Shopkeeper', 'Bachelor’s Degree', '109 Hospital View, Kampala, Kampala', 'Choir member'),
 (520, 520, 'Paul Busingye', 66, '+256708547297', 'paul.busingye87@gmail.com', 'Carpenter', 'Diploma', 'Esther Tumusiime', 43, '+256789057664', 'esther.220@gmail.com', 'Tailor', 'Master’s Degree', 'Robert Busingye', 'Mother', 41, '+256787154300', 'robert.65@yahoo.com', 'Civil Servant', 'Master’s Degree', '129 Hospital View, Lira, Lira', 'Active in debate club');
-INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
+INSERT INTO `parents` (`ParentId`, `AdmissionNo`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
 (521, 521, 'Peter Mugabe', 67, '+256785050278', 'peter.mugabe65@gmail.com', 'Civil Servant', 'Bachelor’s Degree', 'Sandra Musoke', 45, '+256788575156', 'sandra.398@gmail.com', 'Farmer', 'Secondary', 'Susan Mugabe', 'Uncle', 63, '+256773665663', 'susan.5@yahoo.com', 'Engineer', 'Master’s Degree', '184 Hospital View, Fort Portal, Fort Portal', 'Active in debate club'),
 (522, 522, 'Daniel Kyomuhendo', 32, '+256751940085', 'daniel.kyomuhendo66@gmail.com', 'Doctor', 'Secondary', 'Ritah Waiswa', 59, '+256759370829', 'ritah.527@gmail.com', 'Civil Servant', 'Bachelor’s Degree', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Prefect'),
 (523, 523, 'Isaac Busingye', 41, '+256759380826', 'isaac.busingye41@gmail.com', 'Farmer', 'Secondary', 'Joan Nantogo', 52, '+256706047763', 'joan.467@gmail.com', 'Entrepreneur', 'Diploma', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Prefect'),
@@ -3252,7 +3252,7 @@ INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `fa
 (690, 690, 'Joseph Musoke', 34, '+256757899919', 'joseph.musoke8@gmail.com', 'Engineer', 'Diploma', 'Grace Kyomuhendo', 28, '+256755054236', 'grace.672@gmail.com', 'Nurse', 'Secondary', 'Florence Musoke', 'Aunt', 29, '+256784831966', 'florence.56@yahoo.com', 'Civil Servant', 'Diploma', '473 Market Lane, Gulu, Gulu', 'Prefect'),
 (691, 691, 'Solomon Nantogo', 34, '+256782123180', 'solomon.nantogo9@gmail.com', 'Farmer', 'Bachelor’s Degree', 'Pritah Musoke', 40, '+256706495970', 'pritah.232@gmail.com', 'Entrepreneur', 'Master’s Degree', 'Hellen Nantogo', 'Father', 71, '+256772947340', 'hellen.54@yahoo.com', 'Mechanic', 'Primary', '438 Central Avenue, Soroti, Soroti', 'Science fair participant'),
 (692, 692, 'Brian Mugabe', 68, '+256703659927', 'brian.mugabe16@gmail.com', 'Engineer', 'Master’s Degree', 'Winnie Lwanga', 48, '+256759710021', 'winnie.690@gmail.com', 'Civil Servant', 'Bachelor’s Degree', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active in debate club');
-INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
+INSERT INTO `parents` (`ParentId`, `AdmissionNo`, `father_name`, `father_age`, `father_contact`, `father_email`, `father_occupation`, `father_education`, `mother_name`, `mother_age`, `mother_contact`, `mother_email`, `mother_occupation`, `mother_education`, `guardian_name`, `guardian_relation`, `guardian_age`, `guardian_contact`, `guardian_email`, `guardian_occupation`, `guardian_education`, `guardian_address`, `MoreInformation`) VALUES
 (693, 693, 'John Byaruhanga', 54, '+256774687328', 'john.byaruhanga76@gmail.com', 'Carpenter', 'Primary', 'Pritah Akello', 54, '+256787706207', 'pritah.188@gmail.com', 'Entrepreneur', 'Bachelor’s Degree', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Football team'),
 (694, 694, 'Solomon Nakato', 45, '+256778395862', 'solomon.nakato56@gmail.com', 'Farmer', 'Bachelor’s Degree', 'Grace Aine', 46, '+256785129134', 'grace.574@gmail.com', 'Housewife', 'Secondary', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Football team'),
 (695, 695, 'Joseph Waiswa', 63, '+256702859481', 'joseph.waiswa68@gmail.com', 'Farmer', 'Primary', 'Sandra Kato', 49, '+256757534789', 'sandra.951@gmail.com', 'Nurse', 'Diploma', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Science fair participant'),
@@ -3372,7 +3372,7 @@ INSERT INTO `parents` (`ParentId`, `StudentID`, `father_name`, `father_age`, `fa
 --
 
 CREATE TABLE `students` (
-  `StudentID` int(11) NOT NULL,
+  `AdmissionNo` int(11) NOT NULL,
   `AdmissionYear` year(4) NOT NULL,
   `Name` varchar(100) DEFAULT NULL,
   `Surname` varchar(100) NOT NULL,
@@ -3392,7 +3392,7 @@ CREATE TABLE `students` (
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`StudentID`, `AdmissionYear`, `Name`, `Surname`, `DateOfBirth`, `Gender`, `HouseNo`, `Street`, `Village`, `Town`, `District`, `State`, `Country`, `PhotoPath`) VALUES
+INSERT INTO `students` (`AdmissionNo`, `AdmissionYear`, `Name`, `Surname`, `DateOfBirth`, `Gender`, `HouseNo`, `Street`, `Village`, `Town`, `District`, `State`, `Country`, `PhotoPath`) VALUES
 (1, '2025', 'Samuel', 'Ochieng', '2007-05-19', 'Male', '318', 'Hospital View', 'Soroti Central', 'Soroti', 'Soroti', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (2, '2025', 'Brenda', 'Nantogo', '2008-02-06', 'Female', '234', 'Market Lane', 'Lira Central', 'Lira', 'Lira', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (3, '2025', 'Isaac', 'Ssemwogerere', '2009-10-13', 'Male', '497', 'Main Street', 'Arua Central', 'Arua', 'Arua', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
@@ -3668,7 +3668,7 @@ INSERT INTO `students` (`StudentID`, `AdmissionYear`, `Name`, `Surname`, `DateOf
 (273, '2025', 'David', 'Ochieng', '2005-10-16', 'Male', '211', 'School Road', 'Soroti Central', 'Soroti', 'Soroti', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (274, '2025', 'Samuel', 'Ochieng', '2008-01-06', 'Male', '120', 'Market Lane', 'Gulu Central', 'Gulu', 'Gulu', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (275, '2025', 'Joseph', 'Nakato', '2006-04-26', 'Male', '154', 'Hospital View', 'Masaka Central', 'Masaka', 'Masaka', 'Central Region', 'Uganda', 'static/images/default_profile.png');
-INSERT INTO `students` (`StudentID`, `AdmissionYear`, `Name`, `Surname`, `DateOfBirth`, `Gender`, `HouseNo`, `Street`, `Village`, `Town`, `District`, `State`, `Country`, `PhotoPath`) VALUES
+INSERT INTO `students` (`AdmissionNo`, `AdmissionYear`, `Name`, `Surname`, `DateOfBirth`, `Gender`, `HouseNo`, `Street`, `Village`, `Town`, `District`, `State`, `Country`, `PhotoPath`) VALUES
 (276, '2025', 'Sarah', 'Mugabe', '2007-12-30', 'Female', '333', 'School Road', 'Fort Portal Central', 'Fort Portal', 'Fort Portal', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (277, '2025', 'Ivan', 'Byaruhanga', '2008-07-27', 'Male', '31', 'Main Street', 'Fort Portal Central', 'Fort Portal', 'Fort Portal', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (278, '2025', 'Brenda', 'Opio', '2008-10-01', 'Female', '11', 'Central Avenue', 'Mbale Central', 'Mbale', 'Mbale', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
@@ -3941,7 +3941,7 @@ INSERT INTO `students` (`StudentID`, `AdmissionYear`, `Name`, `Surname`, `DateOf
 (545, '2025', 'Joy', 'Byaruhanga', '2006-02-18', 'Female', '263', 'Central Avenue', 'Gulu Central', 'Gulu', 'Gulu', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (546, '2025', 'Samuel', 'Busingye', '2007-09-17', 'Male', '27', 'School Road', 'Kampala Central', 'Kampala', 'Kampala', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (547, '2025', 'Ritah', 'Kyomuhendo', '2008-10-20', 'Female', '52', 'Church Road', 'Soroti Central', 'Soroti', 'Soroti', 'Central Region', 'Uganda', 'static/images/default_profile.png');
-INSERT INTO `students` (`StudentID`, `AdmissionYear`, `Name`, `Surname`, `DateOfBirth`, `Gender`, `HouseNo`, `Street`, `Village`, `Town`, `District`, `State`, `Country`, `PhotoPath`) VALUES
+INSERT INTO `students` (`AdmissionNo`, `AdmissionYear`, `Name`, `Surname`, `DateOfBirth`, `Gender`, `HouseNo`, `Street`, `Village`, `Town`, `District`, `State`, `Country`, `PhotoPath`) VALUES
 (548, '2025', 'Joan', 'Namukasa', '2008-01-09', 'Female', '341', 'School Road', 'Lira Central', 'Lira', 'Lira', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (549, '2025', 'Pritah', 'Okello', '2006-01-21', 'Female', '56', 'Central Avenue', 'Mbale Central', 'Mbale', 'Mbale', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
 (550, '2025', 'Sandra', 'Nantogo', '2008-08-01', 'Female', '41', 'Church Road', 'Kampala Central', 'Kampala', 'Kampala', 'Central Region', 'Uganda', 'static/images/default_profile.png'),
@@ -4208,34 +4208,34 @@ INSERT INTO `students` (`StudentID`, `AdmissionYear`, `Name`, `Surname`, `DateOf
 --
 ALTER TABLE `academichistory`
   ADD PRIMARY KEY (`HistoryID`),
-  ADD KEY `StudentID` (`StudentID`);
+  ADD KEY `AdmissionNo` (`AdmissionNo`);
 
 --
 -- Indexes for table `enrollment`
 --
 ALTER TABLE `enrollment`
   ADD PRIMARY KEY (`EnrollmentID`),
-  ADD KEY `StudentID` (`StudentID`);
+  ADD KEY `AdmissionNo` (`AdmissionNo`);
 
 --
 -- Indexes for table `enrollmenthistory`
 --
 ALTER TABLE `enrollmenthistory`
   ADD PRIMARY KEY (`HistoryID`),
-  ADD KEY `StudentID` (`StudentID`);
+  ADD KEY `AdmissionNo` (`AdmissionNo`);
 
 --
 -- Indexes for table `parents`
 --
 ALTER TABLE `parents`
   ADD PRIMARY KEY (`ParentId`),
-  ADD KEY `StudentID` (`StudentID`);
+  ADD KEY `AdmissionNo` (`AdmissionNo`);
 
 --
 -- Indexes for table `students`
 --
 ALTER TABLE `students`
-  ADD PRIMARY KEY (`StudentID`);
+  ADD PRIMARY KEY (`AdmissionNo`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -4269,7 +4269,7 @@ ALTER TABLE `parents`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `StudentID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=822;
+  MODIFY `AdmissionNo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=822;
 
 --
 -- Constraints for dumped tables
@@ -4279,25 +4279,25 @@ ALTER TABLE `students`
 -- Constraints for table `academichistory`
 --
 ALTER TABLE `academichistory`
-  ADD CONSTRAINT `academichistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE;
+  ADD CONSTRAINT `academichistory_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `enrollment`
 --
 ALTER TABLE `enrollment`
-  ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE;
+  ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `enrollmenthistory`
 --
 ALTER TABLE `enrollmenthistory`
-  ADD CONSTRAINT `enrollmenthistory_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE;
+  ADD CONSTRAINT `enrollmenthistory_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `parents`
 --
 ALTER TABLE `parents`
-  ADD CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`StudentID`) REFERENCES `students` (`StudentID`) ON DELETE CASCADE;
+  ADD CONSTRAINT `parents_ibfk_1` FOREIGN KEY (`AdmissionNo`) REFERENCES `students` (`AdmissionNo`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

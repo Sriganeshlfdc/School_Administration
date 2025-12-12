@@ -216,7 +216,7 @@ $selected_summary_term = get_summary_filter_value('summary_term', 'Term 1');
              <form id="student-filter-form" class="filter-form">
                 <input type="hidden" name="module" value="list"> 
                 
-                <div class="field-group"><label for="search-id">ID</label><input type="text" id="search-id" name="search_id" placeholder="ID..."></div>
+                <div class="field-group"><label for="search-id">Adm-no</label><input type="text" id="search-id" name="search_id" placeholder="Ad No..."></div>
                 <div class="field-group"><label for="search-name">Name</label><input type="text" id="search-name" name="search_name" placeholder="Name..."></div>
                 
                 <div class="field-group"><label for="filter-level">Level</label><select id="filter-level" name="level"><option value="">All</option><option value="pre-primary">Pre-Primary</option><option value="primary">Primary</option><option value="secondary">Secondary</option></select></div>
@@ -280,7 +280,7 @@ $selected_summary_term = get_summary_filter_value('summary_term', 'Term 1');
               </div>
               <form id="editStudentForm" action="edit_student.php" method="POST">
                   <div class="modal-body">
-                      <input type="hidden" name="StudentID" id="modal-StudentID">
+                      <input type="hidden" name="AdmissionNo" id="modal-AdmissionNo">
                       <div class="detail-section">
                           <div class="detail-photo">
                               <img id="detail-photo-img" src="" alt="Student Photo">
@@ -354,18 +354,19 @@ $selected_summary_term = get_summary_filter_value('summary_term', 'Term 1');
           <?php include 'partial/migrate_view.php'; ?>
       </div>
 
-      <div id="quickedit-module" class="module" style="display: none;"></div>
-      <div id="academicedit-module" class="module" style="display: none;"></div>
-      <div id="searchstudent-module" class="module" style="display: none;"></div>
+      <div id="quickedit-module" class="module" style="display: none;">
+        <?php include 'partial/quick_edit_view.php'; ?>
+    \ </div>
+      <div id="academicedit-module" class="module" style="display: none;">
+        <?php include 'partial/academic_edit_view.php'; ?>
+      </div>
+      <div id="searchstudent-module" class="module" style="display: none;">
+            <?php include 'partial/search_student_view.php'; ?>
+        </div>
+    <div id="studentphotos-module" class="module" style="display: none;">
+        <?php include 'partial/student_photos_view.php'; ?>
+    </div>
       <div id="studentaccounts-module" class="module" style="display: none;"></div>
       <div id="oldstudentdebt-module" class="module" style="display: none;"></div>
       <div id="oldstudentrec-module" class="module" style="display: none;"></div>
       <div id="studentcomments-module" class="module" style="display: none;"></div> 
-      
-      <div class="overlay" id="overlay"></div>
-      <div class="settings-panel" id="settings-panel">
-        <div class="settings-header">
-          <h3>Settings</h3><button id="settings-close-btn" class="close-btn">&times;</button>
-        </div>
-        <div class="settings-item theme-toggle"><strong>Theme</strong><button id="theme-toggle-btn" class="btn btn-secondary">Switch to Dark</button></div>
-      </div>
